@@ -5,14 +5,14 @@ import 'package:country/country.dart';
 import 'package:xml/xml.dart';
 
 
-class Metar implements FlightCategoryRelated {
+class MetarTDS implements FlightCategoryRelated {
 
-  Metar._(this.raw_text, this.station_id, this.observation_time, this.latitude, this.longitude,
+  MetarTDS._(this.raw_text, this.station_id, this.observation_time, this.latitude, this.longitude,
       this.temp_c, this.dewpoint_c, this.wind_dir_degrees, this.wind_speed_kt, this.wind_gust_kt,
       this.visibility_statute_mi, this.altim_in_hg, this.wx_string, this.sky_condition, this.flight_category,
       this.precip_in, this.elevation_m);
 
-  factory Metar.fromElement(XmlElement metarElement) {
+  factory MetarTDS.fromElement(XmlElement metarElement) {
     var raw = metarElement.getElement('raw_text')?.text ?? "";
     var id = metarElement.getElement('station_id')?.text ?? "";
     var time = DateTime.parse(metarElement.getElement('observation_time')?.text ?? DateTime.now().toString());

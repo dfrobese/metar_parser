@@ -1,5 +1,5 @@
 import 'lib/src/TDSRequest.dart';
-import 'lib/src/Metar.dart';
+import 'lib/src/MetarTDS.dart';
 
 
 void main() {
