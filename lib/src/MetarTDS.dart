@@ -1,7 +1,7 @@
 
-import 'package:MetarParser/src/CloudStack.dart';
-import 'package:MetarParser/src/FlightCategory.dart';
-import 'package:MetarParser/src/Wind.dart';
+import 'package:metar_parser_dart/src/CloudStack.dart';
+import 'package:metar_parser_dart/src/FlightCategory.dart';
+import 'package:metar_parser_dart/src/Wind.dart';
 import 'package:country/country.dart';
 import 'package:metar_dart/metar_dart.dart';
 import 'package:xml/xml.dart';

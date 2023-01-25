@@ -1,5 +1,5 @@
-import 'package:MetarParser/src/PresentWeather.dart';
-import 'package:test/test.dart';
+import 'package:metar_parser_dart/src/PresentWeather.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main () {
   test('Present Weather test', () {
@@ -18,6 +18,5 @@ void main () {
     weather = PresentWeather.parse("-SN BR");
     expect(weather.text.toString(), 'light snow mist');
     print(weather.text);
-
   });
 }
