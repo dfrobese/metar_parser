@@ -7,7 +7,7 @@ enum CloudCoverage {
   static final List<double> defaultCloudbases = [25000.0, 12000, 5000, 0, 0, 0, 0, 0, 0, 5000];
 
   /// cloud cover
-  static final List<double> cloudCovers = [0.0, 0, 0, 1/8, 3 / 8, 5/8, 1, 1, 1, 0];
+  static final List<double> cloudCovers = [0.0, 0, 0, 1/8, 3/8, 5/8, 1, 1, 1, 0];
 
   /// weather symbol
   static final symbols = ['☀️', '☀️', '☀️', '🌤️', '⛅️', '🌥', '☁️', '', '', '☀️'];

@@ -11,11 +11,11 @@ import 'package:xml/xml.dart';
 
 class CloudLayer {
 
-  CloudLayer(this.coverage, this.baseAGL);
+  CloudLayer._(this.coverage, this.baseAGL);
 
   /// Create object from XML attributes
   factory CloudLayer.fromElement(XmlElement cloudElement) {
-    var layer = CloudLayer(CloudCoverage.CAVOK, CloudCoverage.CAVOK.defaultCloudbase);
+    var layer = CloudLayer._(CloudCoverage.CAVOK, CloudCoverage.CAVOK.defaultCloudbase);
     for (var attribute in cloudElement.attributes) {
       if (attribute.name.toString() == "sky_cover") {
         layer.coverage = CloudCoverage.parse(attribute.value);

@@ -8,6 +8,6 @@ void main() {
   TDSRequest request = TDSRequest();
 
   var file = request.readFile(Config.metar);
-  file.then((content) => Metar.parse(content.toString()));
+  file.then((content) => MetarTDS.parse(content.toString()));
 
 }

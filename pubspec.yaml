@@ -1,4 +1,4 @@
-name: MetarParser
+name: metar_parser_dart
 description: Parse Meteorological Weather reports emited from aeronautical land stations (METAR). Coming soon TAF and SYNOP.
 version: 0.0.1
 # repository: https://github.com/TAF-Verification/metar-dart

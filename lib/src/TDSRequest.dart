@@ -19,9 +19,7 @@ class TDSRequest {
   }
 
   Future<String> readFile(Config config ) async {
-
     String link = cachedPath(config);
-
     Response response = await get(Uri.parse(link));
     return response.body;
   }

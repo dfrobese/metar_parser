@@ -1,7 +1,9 @@
 
 import 'package:MetarParser/src/CloudStack.dart';
 import 'package:MetarParser/src/FlightCategory.dart';
+import 'package:MetarParser/src/Wind.dart';
 import 'package:country/country.dart';
+import 'package:metar_dart/metar_dart.dart';
 import 'package:xml/xml.dart';
 
 
@@ -9,7 +11,7 @@ class MetarTDS implements FlightCategoryRelated {
 
   MetarTDS._(this.raw_text, this.station_id, this.observation_time, this.latitude, this.longitude,
       this.temp_c, this.dewpoint_c, this.wind_dir_degrees, this.wind_speed_kt, this.wind_gust_kt,
-      this.visibility_statute_mi, this.altim_in_hg, this.wx_string, this.sky_condition, this.flight_category,
+      this.visibility_statute_mi, this.altim_in_hg, this.wx_string, this.sky_condition, this._flight_category,
       this.precip_in, this.elevation_m);
 
   factory MetarTDS.fromElement(XmlElement metarElement) {
@@ -20,7 +22,14 @@ class MetarTDS implements FlightCategoryRelated {
     var longitude = double.parse(metarElement.getElement('longitude')?.text ?? "0");
     var temp_c = double.parse(metarElement.getElement('temp_c')?.text ?? "0");
     var dewpoint_c = double.parse(metarElement.getElement('dewpoint_c')?.text ?? "0");
+
+    var dir = metarElement.findElements('wind_dir_degrees');
+    if (dir.length > 0) {
+      print("Found wind ");
+    }
+
     var wind_dir_degrees = double.parse(metarElement.getElement('wind_dir_degrees')?.text ?? "0");
+
     var wind_speed_kt = double.parse(metarElement.getElement('wind_speed_kt')?.text ?? "0");
     var wind_gust_kt = double.parse(metarElement.getElement('wind_gust_kt')?.text ?? "0");
     var visibility_statute_mi = double.parse(metarElement.getElement('visibility_statute_mi')?.text ?? "0");
@@ -31,7 +40,12 @@ class MetarTDS implements FlightCategoryRelated {
 
     var precip_in = double.parse(metarElement.getElement('precip_in')?.text ?? "0");
     var elevation_m = double.parse(metarElement.getElement('elevation_m')?.text ?? "0");
-    return Metar._(raw, id, time, latitude, longitude, temp_c, dewpoint_c, wind_dir_degrees, wind_speed_kt, wind_gust_kt,
+
+    var wind = Wind(wind_speed_kt, wind_dir_degrees);
+    wind.gust = wind_gust_kt;
+
+
+    return MetarTDS._(raw, id, time, latitude, longitude, temp_c, dewpoint_c, wind_dir_degrees, wind_speed_kt, wind_gust_kt,
     visibility_statute_mi, altim_in_hg, wx_string, sky_condition, flight_category, precip_in, elevation_m);
   }
 
@@ -53,27 +67,42 @@ class MetarTDS implements FlightCategoryRelated {
   // </quality_control_flags>
   String wx_string; // >DZ</wx_string>
   CloudStack sky_condition; // sky_cover="OVC" cloud_base_ft_agl="500"/>
-  FlightCategory flight_category; //>IFR</flight_category>
+  FlightCategory _flight_category; //>IFR</flight_category>
   double precip_in; // >0.01</precip_in>
   // <metar_type>METAR</metar_type>
   double elevation_m; //>282.0</elevation_m>
   //
 
-   Coordinate get coordinate => Coordinate(latitude, longitude);
+   /// GPS coordinates of station
+   late Coordinate coordinate =  Coordinate(latitude, longitude);
+   /// horizontal visibility in status miles
    double get visibility => this.visibility_statute_mi;
-   double get lowestSignificantCloudBase => 0;
+   /// base AGL of lowest significant cloud
+   late double lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
+   /// Flight category VFR, MVFR, IFR or LIFR
+   FlightCategory get flightCategory => this._flight_category == FlightCategory.NONE ? FlightCategory.calc(this) : this._flight_category;
+   /// parsed metar information from raw string
+  late Metar metar = Metar(this.raw_text);
+   /// Visible runway length
 
-
+  /// parse NOAA text data server Metar XML structure
   static void parse(String body) {
     var document = XmlDocument.parse(body);
     var root = document.getElement('data');
     var elements = document.findAllElements('METAR');
 
-      var rootMetars = elements.map<Metar>((e) => Metar.fromElement(e)).toList();
+      var rootMetars = elements.map<MetarTDS>((e) => MetarTDS.fromElement(e)).toList();
       rootMetars.forEach((element) {
         print(element.station_id);
         print(element.coordinate);
-        print(element.flight_category);
+        print(element.visibility);
+        print(element.lowestSignificantCloudBase);
+        print(element._flight_category);
+         print(element.wind_speed_kt);
+        print(element.wind_dir_degrees);
+
+        print(FlightCategory.calc(element));
+        print(element.wx_string.toString());
       });
   }
 

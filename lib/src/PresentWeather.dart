@@ -1,3 +1,5 @@
+
+
 class PresentWeather {
 
   static final intensity = {"-": "light", "+": "heavy", "VC": "vicinity", "RE": "recent"};
@@ -7,49 +9,50 @@ class PresentWeather {
   static final other = {"PO": "dust/sand whirls", "SQ": "squalls", "FC": "🌪 tornado or waterspout", "SS": "sandstorm", "DS": "duststorm"};
   static final symbols= {"DZ": "🌦", "RA": "🌧", "SN": "🌨", "SG": "❄️", "IC": "❄️", "PL": "❄️", "GR": "❄️ hail", "GS": "❄️", "UP": "?", "VA": "🌋", "FC": "🌪",  "TS": "🌩", "FZ": "❄️", "BR": " 💨"};
 
-  static final intensityRegStr = {"-", "\\+", "VC", "RE"}.join("|");
-  static final descriptorRegStr = "(" + PresentWeather.descriptor.keys.join("|") + ")" ;
-  static final precipitationRegStr = "(" + PresentWeather.precipitation.keys.join("|") + ")";
-  static final obscurationRegStr = "(" + PresentWeather.obscuration.keys.join("|") + ")";
-  static final otherReStr = "(" + PresentWeather.other.keys.join("|") + ")";
 
+  static final String intensityRegStr = {"-", "\\+", "VC", "RE"}.join("|");
+  static final String descriptorRegStr =  PresentWeather.descriptor.keys.join("|") ;
+  static final String precipitationRegStr =  PresentWeather.precipitation.keys.join("|") ;
+  static final String obscurationRegStr =  PresentWeather.obscuration.keys.join("|");
+  static final String otherReStr = PresentWeather.other.keys.join("|");
+
+  static final pattern = [[intensityRegStr, intensity], [descriptorRegStr, descriptor], [precipitationRegStr, precipitation], [obscurationRegStr, obscuration], [otherReStr, other]];
+
+  /// weather string coded
   String wxString;
+  /// weather decoded
   String text;
+  /// symbols
   String symbol;
 
   PresentWeather._(this.wxString, this.text, this.symbol);
 
-  factory PresentWeather.parse(String line) {
+  factory PresentWeather.parse(String wxString) {
+
+    var line = wxString;
     StringBuffer text = StringBuffer();
     StringBuffer symbol = StringBuffer();
-    var rx = RegExp(intensityRegStr);
-    var matches = rx.allMatches(line);
-    matches.forEach((element) => text.write((intensity[element[0]] ?? "") + " "));
-    rx = RegExp(descriptorRegStr);
-    matches = rx.allMatches(line);
-    matches.forEach((element) => text.write((descriptor[element[0]] ?? "") + " "));
-    rx = RegExp(precipitationRegStr);
-    matches = rx.allMatches(line);
-    matches.forEach((element) {
-      var found = element[0];
-      text.write((precipitation[found] ?? "") + " ");
-      symbol.write(symbols[found] ?? "");
-    });
-    rx = RegExp(obscurationRegStr);
-    matches = rx.allMatches(line);
-    matches.forEach((element) {
-      var found = element[0];
-      text.write((obscuration[found] ?? "") + " ");
-      symbol.write(symbols[found] ?? "");
-    });
-    rx = RegExp(otherReStr);
-    matches = rx.allMatches(line);
-    matches.forEach((element) {
-      var found = element[0];
-      text.write((other[found] ?? "") + " ");
-      symbol.write(symbols[found] ?? "");
+
+    pattern.forEach((pair) {
+      // regex string
+      var rx = RegExp(pair[0] as String);
+      var matches = rx.allMatches(line);
+      matches.forEach((element) {
+        var found = element[0];
+        line = line.substring(element.end);
+        // map found acronym to plain text
+        text.write(((pair[1] as Map<String, String>)[found] ?? "") + " ");
+        symbol.write(symbols[found] ?? "");
+      });
     });
 
     return PresentWeather._(line, text.toString().trim(), symbol.toString());
+   }
+
+
+   String toString() {
+
+    return text;
+
    }
 }

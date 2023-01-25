@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:MetarParser/src/CloudCoverage.dart';
 import 'package:MetarParser/src/CloudLayer.dart';
 import 'package:xml/xml.dart';
 
@@ -44,5 +45,17 @@ class CloudStack extends CloudList<CloudLayer> {
     return stack;
   }
 
+  double _lowestSignificantCloudBase() {
+    var lowestAGL = CloudCoverage.SKC.defaultCloudbase;
+    this.forEach((element) {
+          if (element.coverage.cloudCover >= CloudCoverage.BKN.cloudCover &&
+              element.baseAGL <= lowestAGL) {
+            lowestAGL = element.baseAGL;
+          }
+    });
+    return lowestAGL;
+  }
+
+  late double lowestSignificantCloudBase = this._lowestSignificantCloudBase();
 }
 
