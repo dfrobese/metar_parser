@@ -21,16 +21,18 @@ class Wind {
   /// Wind direction in degrees
   double direction;
   /// Wind direction min in degrees
-  double dir_from = 0;
+  double ?dir_from;
   /// Wind direction max in degrees
-  double dir_to = 0;
+  double ?dir_to;
   /// Wind speed in knots
   double speed;
   /// Wind gusts in knots
   double gust = 0;
 
-  Wind(this.direction, this.speed);
+  Wind(this.direction, this.speed, this.gust, [this.dir_from , this.dir_to]);
 
-
-
+  /// Return true if gusty wind condition
+  bool get isGusty => gust > 0;
+  /// Return variable or not
+  bool get isVariable => direction == 0;
 }

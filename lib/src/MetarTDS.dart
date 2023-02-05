@@ -1,4 +1,4 @@
-
+import 'dart:developer' as developer;
 import 'package:metar_parser_dart/src/CloudStack.dart';
 import 'package:metar_parser_dart/src/FlightCategory.dart';
 import 'package:metar_parser_dart/src/Wind.dart';
@@ -25,7 +25,7 @@ class MetarTDS implements FlightCategoryRelated {
 
     var dir = metarElement.findElements('wind_dir_degrees');
     if (dir.length > 0) {
-      print("Found wind ");
+      developer.log('wind found', name: 'my.app.category');
     }
 
     var wind_dir_degrees = double.parse(metarElement.getElement('wind_dir_degrees')?.text ?? "0");
@@ -41,8 +41,6 @@ class MetarTDS implements FlightCategoryRelated {
     var precip_in = double.parse(metarElement.getElement('precip_in')?.text ?? "0");
     var elevation_m = double.parse(metarElement.getElement('elevation_m')?.text ?? "0");
 
-    var wind = Wind(wind_speed_kt, wind_dir_degrees);
-    wind.gust = wind_gust_kt;
 
 
     return MetarTDS._(raw, id, time, latitude, longitude, temp_c, dewpoint_c, wind_dir_degrees, wind_speed_kt, wind_gust_kt,
@@ -82,8 +80,13 @@ class MetarTDS implements FlightCategoryRelated {
    /// Flight category VFR, MVFR, IFR or LIFR
    FlightCategory get flightCategory => this._flight_category == FlightCategory.NONE ? FlightCategory.calc(this) : this._flight_category;
    /// parsed metar information from raw string
-  late Metar metar = Metar(this.raw_text);
-   /// Visible runway length
+   late Metar metar = Metar(this.raw_text);
+   /// Wind
+   late Wind wind = Wind(wind_speed_kt, wind_dir_degrees, wind_gust_kt);
+   /// More Wind
+   late Wind moreWind = Wind(metar.wind.speedInKnot ?? 0, metar.wind.directionInDegrees ?? 0, metar.wind.gustInKnot ?? 0, metar.windVariation.fromInDegrees, metar.windVariation.toInDegrees);
+
+/// TODO  Visible runway length
 
   /// parse NOAA text data server Metar XML structure
   static List<MetarTDS> parse(String body) {
