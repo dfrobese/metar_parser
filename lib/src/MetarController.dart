@@ -24,7 +24,7 @@ class MetarController {
   
   /// Makes a full file request of all Metars
   Future<void> fullRequest() async {
-    request.readZippedFile(Config.metar).then((content) {
+      var content = await request.readZippedFile(Config.metar);
       final file = content.toString();
       if (file.length < 100) {
           developer.log('ERROR file not found');
@@ -32,7 +32,6 @@ class MetarController {
       }
       final Map<String, MetarTDS> metars = MetarTDS.parse(file);
       metarDict.addAll(metars);
-    });
   }
 }
 

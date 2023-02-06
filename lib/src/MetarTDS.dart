@@ -25,7 +25,7 @@ class MetarTDS implements FlightCategoryRelated {
 
     var dir = metarElement.findElements('wind_dir_degrees');
     if (dir.length > 0) {
-      developer.log('wind found', name: 'my.app.category');
+      // developer.log('wind found', name: 'my.app.category');
     }
 
     var wind_dir_degrees = double.parse(metarElement.getElement('wind_dir_degrees')?.text ?? "0");
