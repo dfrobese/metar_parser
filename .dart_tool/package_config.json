@@ -14,6 +14,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "archive",
+      "rootUri": "file:///Users/dfrobese/.pub-cache/hosted/pub.dev/archive-3.3.6",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "args",
       "rootUri": "file:///Users/dfrobese/.pub-cache/hosted/pub.dev/args-2.3.2",
       "packageUri": "lib/",
@@ -162,6 +168,12 @@
       "rootUri": "file:///Users/dfrobese/.pub-cache/hosted/pub.dev/petitparser-5.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.18"
+    },
+    {
+      "name": "pointycastle",
+      "rootUri": "file:///Users/dfrobese/.pub-cache/hosted/pub.dev/pointycastle-3.6.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "pool",
@@ -320,7 +332,7 @@
       "languageVersion": "2.17"
     }
   ],
-  "generated": "2023-02-05T10:19:29.014533Z",
+  "generated": "2023-02-06T20:57:34.777842Z",
   "generator": "pub",
   "generatorVersion": "2.19.1"
 }

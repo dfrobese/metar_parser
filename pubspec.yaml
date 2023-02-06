@@ -14,6 +14,7 @@ dependencies:
   country: ^2.0.3
   units_converter: ^2.0.1
   metar_dart: ^0.3.2
+  archive: ^3.3.6
 
  # quiver: ^3.1.0
   # tuple: ^2.0.0

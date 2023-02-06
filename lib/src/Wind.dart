@@ -19,17 +19,17 @@ enum WindUnit {
 
 class Wind {
   /// Wind direction in degrees
-  double direction;
+  final double direction;
   /// Wind direction min in degrees
-  double ?dir_from;
+  final double ?dir_from;
   /// Wind direction max in degrees
-  double ?dir_to;
+  final double ?dir_to;
   /// Wind speed in knots
-  double speed;
+  final double speed;
   /// Wind gusts in knots
-  double gust = 0;
+  final double gust;
 
-  Wind(this.direction, this.speed, this.gust, [this.dir_from , this.dir_to]);
+  const Wind(this.direction, this.speed, this.gust, [this.dir_from , this.dir_to]);
 
   /// Return true if gusty wind condition
   bool get isGusty => gust > 0;

@@ -89,13 +89,14 @@ class MetarTDS implements FlightCategoryRelated {
 /// TODO  Visible runway length
 
   /// parse NOAA text data server Metar XML structure
-  static List<MetarTDS> parse(String body) {
+  static Map<String, MetarTDS> parse(String body) {
     var document = XmlDocument.parse(body);
     var root = document.getElement('data');
-    var elements = document.findAllElements('METAR');
-
-    var rootMetars = elements.map<MetarTDS>((e) => MetarTDS.fromElement(e)).toList();
-    return rootMetars;
+    final elements = document.findAllElements('METAR');
+    final map = Map<String, MetarTDS>.fromIterable(elements,
+        key: (item) => item.getElement('station_id')?.text!,
+        value: (item) => MetarTDS.fromElement(item));
+    return map;
   }
 
 }
