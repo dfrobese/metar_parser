@@ -23,7 +23,7 @@ class MetarController {
   MetarController();
   
   /// Makes a full file request of all Metars
-  void fullRequest() async {
+  Future<void> fullRequest() async {
     request.readZippedFile(Config.metar).then((content) {
       final file = content.toString();
       if (file.length < 100) {
