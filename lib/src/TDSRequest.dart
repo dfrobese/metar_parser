@@ -6,32 +6,59 @@ import 'package:archive/archive_io.dart';
 
 import 'dart:developer' as developer;
 
-enum Config {metar, taf, station}
+import 'package:metar_parser_dart/metar_parser_dart.dart';
+import 'package:metar_parser_dart/src/StationTDS.dart';
+import 'package:xml/xml.dart';
 
 
-/// Class to manage the request against NOAA Metar/Taf  text data server
-class TDSRequest {
+abstract class TDSElement {
 
+}
+
+
+enum TDSRequest {
+  metar, taf, station;
   final String dataServerPath = "https://aviationweather.gov/adds/dataserver_current/";
 
-  const TDSRequest();
+  String get token => this.name.toUpperCase();
 
-  // return cached path
-  String cachedPath(Config config) {
-      switch (config) {
-        case Config.metar:
-          return dataServerPath + "current/metars.cache.xml";
-        case Config.taf:
-          return dataServerPath + "current/tafs.cache.xml";
-        case Config.station:
-          return dataServerPath + ""; // does not exist
-      }
+
+  Type get type {
+    switch (this) {
+      case TDSRequest.metar:
+        return MetarTDS;
+      case TDSRequest.taf:
+        return TafTDS;
+      case TDSRequest.station:
+        return StationTDS; // does not exist
+    }
   }
 
+   fromElement<TDSElement>(XmlElement element) {
+    switch (this) {
+      case TDSRequest.metar:
+        return MetarTDS.fromElement(element);
+      case TDSRequest.taf:
+        return TafTDS.fromElement(element);
+      case TDSRequest.station:
+        return StationTDS.fromElement(element); // does not exist
+    }
+  }
+
+  String get cachedPath {
+    switch (this) {
+      case TDSRequest.metar:
+        return dataServerPath + "current/metars.cache.xml";
+      case TDSRequest.taf:
+        return dataServerPath + "current/tafs.cache.xml";
+      case TDSRequest.station:
+        return dataServerPath + ""; // does not exist
+    }
+  }
 
   /// read file based Metar/Taf/Station information with all entries
-  Future<String> readFile(Config config ) async {
-    String link = cachedPath(config);
+  Future<String> readFile() async {
+    String link = cachedPath;
     try {
       Response response = await get(Uri.parse(link));
       return response.body;
@@ -41,18 +68,28 @@ class TDSRequest {
   }
 
   /// read file based Metar/Taf/Station information with all entries
-  Future<String> readZippedFile(Config config ) async {
-    String link = cachedPath(config) + ".gz";
+  Future<String> readZippedFile() async {
+    String link = cachedPath + ".gz";
     try {
       Response response = await get(Uri.parse(link));
       final bytes = response.bodyBytes.toList();
       final decoder = GZipDecoder();
-       final result  = decoder.decodeBytes(bytes);
+      final result  = decoder.decodeBytes(bytes);
       String unzipped = utf8.decode(result);
-       return unzipped;
+      return unzipped;
     } on Exception catch(e) {
       return "";
     }
   }
 
+  Map<String, TDSElement> parse<TDSElement>(String body) {
+    var document = XmlDocument.parse(body);
+    var root = document.getElement('data');
+    final elements = document.findAllElements(token);
+    final map = Map<String, TDSElement>.fromIterable(elements,
+        key: (item) => item.getElement('station_id')?.text!,
+        value: (item) => this.fromElement<TDSElement>(item) );
+    return map;
+  }
 }
+

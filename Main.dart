@@ -5,11 +5,12 @@ import 'lib/src/TafTDS.dart';
 void main() {
   print('Hello, World!');
 
-  TDSRequest request = TDSRequest();
+  TDSRequest request = TDSRequest.metar;
 
-  var file = request.readFile(Config.metar);
-  file.then((content) => MetarTDS.parse(content.toString()));
+  var file = request.readFile();
+  file.then((content) => request.parse(content.toString()));
 
-  file = request.readFile(Config.taf);
-  file.then((content) => TafTDS.parse(content.toString()));
+  request = TDSRequest.taf;
+  file = request.readFile();
+  file.then((content) => request.parse(content.toString()));
 }

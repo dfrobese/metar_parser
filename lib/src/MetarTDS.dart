@@ -1,13 +1,15 @@
 import 'dart:developer' as developer;
 import 'package:metar_parser_dart/src/CloudStack.dart';
 import 'package:metar_parser_dart/src/FlightCategory.dart';
+import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:metar_parser_dart/src/Wind.dart';
 import 'package:country/country.dart';
 import 'package:metar_dart/metar_dart.dart';
 import 'package:xml/xml.dart';
 
 
-class MetarTDS implements FlightCategoryRelated {
+class MetarTDS  implements TDSElement, FlightCategoryRelated {
+
 
   MetarTDS._(this.raw_text, this.station_id, this.observation_time, this.latitude, this.longitude,
       this.temp_c, this.dewpoint_c, this.wind_dir_degrees, this.wind_speed_kt, this.wind_gust_kt,
@@ -86,17 +88,9 @@ class MetarTDS implements FlightCategoryRelated {
    /// More Wind
    late Wind moreWind = Wind(metar.wind.speedInKnot ?? 0, metar.wind.directionInDegrees ?? 0, metar.wind.gustInKnot ?? 0, metar.windVariation.fromInDegrees, metar.windVariation.toInDegrees);
 
+
 /// TODO  Visible runway length
 
-  /// parse NOAA text data server Metar XML structure
-  static Map<String, MetarTDS> parse(String body) {
-    var document = XmlDocument.parse(body);
-    var root = document.getElement('data');
-    final elements = document.findAllElements('METAR');
-    final map = Map<String, MetarTDS>.fromIterable(elements,
-        key: (item) => item.getElement('station_id')?.text!,
-        value: (item) => MetarTDS.fromElement(item));
-    return map;
-  }
+
 
 }

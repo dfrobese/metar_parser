@@ -1,10 +1,11 @@
 import 'dart:developer' as developer;
 import 'package:country/country.dart';
 import 'package:metar_dart/metar_dart.dart';
+import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:xml/xml.dart';
 
 
-class TafTDS  {
+class TafTDS extends TDSElement {
 
   TafTDS._(this.raw_text, this.station_id, this.issue_time, this.latitude, this.longitude, this.elevation_m);
 
@@ -33,17 +34,5 @@ class TafTDS  {
    late Coordinate coordinate =  Coordinate(latitude, longitude);
    late Taf taf = Taf(this.raw_text);
 
-/// TODO  Visible runway length
-
-  /// parse NOAA text data server Metar XML structure
-  static Map<String, TafTDS> parse(String body) {
-    var document = XmlDocument.parse(body);
-    var root = document.getElement('data');
-    final elements = document.findAllElements('TAF');
-    final map = Map<String, TafTDS>.fromIterable(elements,
-        key: (item) => item.getElement('station_id')?.text!,
-        value: (item) => TafTDS.fromElement(item));
-    return map;
-  }
 
 }

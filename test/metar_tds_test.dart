@@ -7,10 +7,10 @@ import 'package:metar_parser_dart/src/TDSRequest.dart';
 
 void main () async {
   test('Load Weather', () async {
-    TDSRequest request = TDSRequest();
-    var file = await request.readZippedFile(Config.metar);
-    final metars = MetarTDS.parse(file);
-    final eddv = metars['EDDV'];
+    TDSRequest request = TDSRequest.metar;
+    var file = await request.readZippedFile();
+    final metars = request.parse<MetarTDS>(file);
+    final eddv = metars['EDDV'] ;
     expect(eddv != null, true);
     expect(eddv!.station_id, 'EDDV');
     print(eddv.station_id);
