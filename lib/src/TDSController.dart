@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:metar_parser_dart/src/MetarTDS.dart';
 import 'package:metar_dart/metar_dart.dart';
@@ -37,16 +38,16 @@ class TDSController<TDSElement> {
   }
 }
 
-class MetarController extends TDSController{
+class MetarController extends TDSController<MetarTDS>{
   MetarController() : super(TDSRequest.metar);
 }
 
 
-class TafController extends TDSController{
+class TafController extends TDSController<TafTDS>{
   TafController() : super(TDSRequest.taf);
 }
 
-class StationController extends TDSController{
+class StationController extends TDSController<StationTDS>{
   StationController() : super(TDSRequest.station);
 }
 

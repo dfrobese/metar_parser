@@ -4,7 +4,7 @@ import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:xml/xml.dart';
 
 
-class StationTDS extends TDSElement {
+class StationTDS implements TDSElement {
     StationTDS._(this.station_id, this.wmo_id, this.latitude, this.longitude, this.elevation_m, this.site, this.state, this.country);
 
     factory StationTDS.fromElement(XmlElement element) {

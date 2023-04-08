@@ -5,7 +5,7 @@ import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:xml/xml.dart';
 
 
-class TafTDS extends TDSElement {
+class TafTDS implements TDSElement {
 
   TafTDS._(this.raw_text, this.station_id, this.issue_time, this.latitude, this.longitude, this.elevation_m);
 
