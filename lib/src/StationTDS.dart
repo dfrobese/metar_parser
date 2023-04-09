@@ -8,17 +8,17 @@ class StationTDS implements TDSElement {
     StationTDS._(this.station_id, this.wmo_id, this.latitude, this.longitude, this.elevation_m, this.site, this.state, this.country);
 
     factory StationTDS.fromElement(XmlElement element) {
-        var wmo_id = element.getElement('wmo_id')?.text ?? "";
+        var wmoId = element.getElement('wmo_id')?.text ?? "";
         var id = element.getElement('station_id')?.text ?? "";
         var time = DateTime.parse(element.getElement('issue_time')?.text ?? DateTime.now().toString());
         var latitude = double.parse(element.getElement('latitude')?.text ?? "0");
         var longitude = double.parse(element.getElement('longitude')?.text ?? "0");
-        var elevation_m = double.parse(element.getElement('elevation_m')?.text ?? "0");
+        var elevationM = double.parse(element.getElement('elevation_m')?.text ?? "0");
         var site = element.getElement('site')?.text ?? "";
         var state = element.getElement('state')?.text ?? "";
         var country = element.getElement('country')?.text ?? "";
 
-        return StationTDS._(id, wmo_id, latitude, longitude, elevation_m, site, state, country);
+        return StationTDS._(id, wmoId, latitude, longitude, elevationM, site, state, country);
     }
 
     String station_id;

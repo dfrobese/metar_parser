@@ -1,6 +1,5 @@
 import 'lib/src/TDSRequest.dart';
-import 'lib/src/MetarTDS.dart';
-import 'lib/src/TafTDS.dart';
+
 
 void main() {
   print('Hello, World!');
