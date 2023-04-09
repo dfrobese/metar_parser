@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
-import 'package:flutter/material.dart';
+import 'package:metar_parser_dart/src/extension/NotifyChanges.dart';
 
 
 class TDSFetchDataException implements Exception {
@@ -14,9 +14,10 @@ class TDSFetchDataException implements Exception {
   }
 }
 
-class TDSController<TDSElement> extends ChangeNotifier {
+class TDSController<TDSElement> extends NotifyChanges {
 
   final Map<String, TDSElement> tdsDict = Map();
+
   TDSRequest request;
 
   TDSController(this.request);

@@ -3,7 +3,6 @@ import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
-import 'package:flutter/material.dart';
 
 
 void main () {

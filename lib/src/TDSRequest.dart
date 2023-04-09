@@ -5,7 +5,7 @@ import 'dart:developer' as developer;
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/StationTDS.dart';
 import 'package:xml/xml.dart';
-import 'package:flutter/services.dart' show rootBundle;
+
 
 
 abstract class TDSElement {
@@ -63,7 +63,7 @@ enum TDSRequest {
           Response response = await get(Uri.parse(link));
           return response.body;
         case TDSRequest.station:
-          return  await rootBundle.loadString(link);
+          return "";
       }
     } on Exception catch(e) {
       return "";
@@ -82,7 +82,7 @@ enum TDSRequest {
           bytes = response.bodyBytes.toList();
           break;
         case TDSRequest.station:
-          bytes = await rootBundle.load(link);
+          return "";
       }
       final decoder = GZipDecoder();
       final result  = decoder.decodeBytes(bytes);
@@ -94,6 +94,9 @@ enum TDSRequest {
   }
 
   Map<String, TDSElement> parse<TDSElement>(String body) {
+    if (body.length < 1) {
+      throw TDSFetchDataException("No connection");
+    }
     var document = XmlDocument.parse(body);
     var root = document.getElement('data');
     final elements = document.findAllElements(token);
