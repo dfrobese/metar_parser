@@ -1,9 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
-import 'package:metar_parser_dart/src/MetarTDS.dart';
 import 'package:flutter/material.dart';
-
 
 
 class TDSFetchDataException implements Exception {
@@ -15,8 +13,6 @@ class TDSFetchDataException implements Exception {
     return "Exception: $_message";
   }
 }
-
-
 
 class TDSController<TDSElement> extends ChangeNotifier {
 

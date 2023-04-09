@@ -1,14 +1,11 @@
 import 'dart:convert';
-
 import 'package:http/http.dart';
-import 'dart:io';
 import 'package:archive/archive_io.dart';
-
 import 'dart:developer' as developer;
-
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/StationTDS.dart';
 import 'package:xml/xml.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 
 abstract class TDSElement {
@@ -52,7 +49,7 @@ enum TDSRequest {
       case TDSRequest.taf:
         return dataServerPath + "current/tafs.cache.xml";
       case TDSRequest.station:
-        return dataServerPath + ""; // does not exist
+        return "assets/stations.xml"; // does not exist
     }
   }
 
@@ -60,8 +57,14 @@ enum TDSRequest {
   Future<String> readFile() async {
     String link = cachedPath;
     try {
-      Response response = await get(Uri.parse(link));
-      return response.body;
+      switch (this) {
+        case TDSRequest.metar:
+        case TDSRequest.taf:
+          Response response = await get(Uri.parse(link));
+          return response.body;
+        case TDSRequest.station:
+          return  await rootBundle.loadString(link);
+      }
     } on Exception catch(e) {
       return "";
     }
@@ -71,8 +74,16 @@ enum TDSRequest {
   Future<String> readZippedFile() async {
     String link = cachedPath + ".gz";
     try {
-      Response response = await get(Uri.parse(link));
-      final bytes = response.bodyBytes.toList();
+      var bytes;
+      switch (this) {
+        case TDSRequest.metar:
+        case TDSRequest.taf:
+          Response response = await get(Uri.parse(link));
+          bytes = response.bodyBytes.toList();
+          break;
+        case TDSRequest.station:
+          bytes = await rootBundle.load(link);
+      }
       final decoder = GZipDecoder();
       final result  = decoder.decodeBytes(bytes);
       String unzipped = utf8.decode(result);

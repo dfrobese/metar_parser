@@ -1,9 +1,11 @@
 import 'package:metar_parser_dart/src/PresentWeather.dart';
-import 'package:test/test.dart';
+import 'package:test/expect.dart';
+import 'package:test/scaffolding.dart';
+
 
 void main () {
-   test('Present Weather test', () {
-    var weather = PresentWeather.parse("RERA");
+ test('Present weather test', () async {
+  var weather = PresentWeather.parse("RERA");
     expect(weather.text.toString(), 'recent rain');
     print(weather.text);
     weather = PresentWeather.parse("RETSGR");

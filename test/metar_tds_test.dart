@@ -1,12 +1,13 @@
 import 'dart:developer' as developer;
 import 'package:metar_parser_dart/metar_parser_dart.dart';
-import 'package:test/test.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
+import 'package:test/expect.dart';
+import 'package:test/scaffolding.dart';
+import 'package:flutter/material.dart';
 
 
-
-void main () async {
-  test('Load Weather', () async {
+void main () {
+  test('Metar test', () async {
     TDSRequest request = TDSRequest.metar;
     var file = await request.readZippedFile();
     final metars = request.parse<MetarTDS>(file);
