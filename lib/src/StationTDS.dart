@@ -10,8 +10,10 @@ class StationTDS implements TDSElement {
         var wmoId = element.getElement('wmo_id')?.text ?? "";
         var id = element.getElement('station_id')?.text ?? "";
         var time = DateTime.parse(element.getElement('issue_time')?.text ?? DateTime.now().toString());
-        var latitude = double.parse(element.getElement('latitude')?.text ?? "0");
+        var latitude = double.parse(element.getElement('latitude')?.text ?? "0") ;
+        latitude = (latitude >= -90.0 && latitude <= 90.0) ? latitude : 0;
         var longitude = double.parse(element.getElement('longitude')?.text ?? "0");
+        longitude = (longitude >= -180.0 && longitude <= 180.0) ? longitude : 0;
         var elevationM = double.parse(element.getElement('elevation_m')?.text ?? "0");
         var site = element.getElement('site')?.text ?? "";
         var state = element.getElement('state')?.text ?? "";
