@@ -23,7 +23,7 @@ class TDSController<TDSElement> extends NotifyChanges {
   TDSController(this.request);
 
   /// Makes a full file request of all Metars
-  Future<void> fullRequest() async {
+  Future<Map<String, TDSElement>> fullRequest() async {
     var content = await request.readZippedFile();
     final file = content.toString();
     if (file.length < 100) {
@@ -33,6 +33,7 @@ class TDSController<TDSElement> extends NotifyChanges {
     final Map<String, TDSElement> elements = request.parse(file);
     tdsDict.addAll(elements);
     notifyListeners();
+    return tdsDict;
   }
 }
 
