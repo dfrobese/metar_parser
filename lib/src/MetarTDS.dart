@@ -1,4 +1,4 @@
-import 'dart:developer' as developer;
+
 import 'package:metar_parser_dart/src/CloudStack.dart';
 import 'package:metar_parser_dart/src/FlightCategory.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
@@ -74,7 +74,7 @@ class MetarTDS  implements TDSElement, FlightCategoryRelated {
   //
 
    /// GPS coordinates of station
-   late Coordinate coordinate =  Coordinate(latitude, longitude);
+   late Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
    /// horizontal visibility in status miles
    double get visibility => this.visibility_statute_mi;
    /// base AGL of lowest significant cloud

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:archive/archive_io.dart';
-import 'dart:developer' as developer;
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/StationTDS.dart';
 import 'package:xml/xml.dart';
@@ -15,7 +14,9 @@ abstract class TDSElement {
 
 enum TDSRequest {
   metar, taf, station;
-  final String dataServerPath = "https://aviationweather.gov/adds/dataserver_current/";
+//  final String dataServerPath = "https://aviationweather.gov/adds/dataserver_current/";
+  final String dataServerPath = "https://aviationweather-bldr.ncep.noaa.gov/adds/dataserver_current/";
+
 
   String get token => this.name.toUpperCase();
 

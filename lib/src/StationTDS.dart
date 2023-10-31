@@ -1,5 +1,4 @@
 import 'package:country/country.dart';
-import 'package:metar_dart/metar_dart.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:xml/xml.dart';
 
@@ -30,6 +29,6 @@ class StationTDS implements TDSElement {
     String state;
     String country;
     /// GPS coordinates of station
-    late Coordinate coordinate =  Coordinate(latitude, longitude);
+    late Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
 
 }

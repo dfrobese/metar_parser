@@ -31,7 +31,7 @@ class TafTDS implements TDSElement {
   //
 
    /// GPS coordinates of station
-   late Coordinate coordinate =  Coordinate(latitude, longitude);
+   late Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
    late Taf taf = Taf(this.raw_text);
 
 

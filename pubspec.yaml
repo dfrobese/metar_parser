@@ -9,8 +9,8 @@ environment:
   sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
-  xml:  ^6.3.0
-  country: ^2.0.3
+  xml:  ^6.4.2
+  country: ^4.0.0
   units_converter: ^2.1.1
   metar_dart: ^0.3.2
   archive: ^3.3.6
