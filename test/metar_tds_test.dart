@@ -14,6 +14,8 @@ void main () {
     expect(eddv != null, true);
     expect(eddv!.station_id, 'EDDV');
     print(eddv.station_id);
+    print(eddv.raw_text);
+    print(eddv.visibility_statute_mi);
     expect(eddv.wind.direction, eddv.moreWind.direction);
     expect(eddv.wind.speed, eddv.moreWind.speed);
   });

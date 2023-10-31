@@ -15,10 +15,18 @@ abstract class TDSElement {
 enum TDSRequest {
   metar, taf, station;
 //  final String dataServerPath = "https://aviationweather.gov/adds/dataserver_current/";
-  final String dataServerPath = "https://aviationweather-bldr.ncep.noaa.gov/adds/dataserver_current/";
+//  final String dataServerPath = "https://aviationweather-bldr.ncep.noaa.gov/adds/dataserver_current/current/";
+  final String dataServerPath = "https://aviationweather.gov/data/cache/";
 
-
-  String get token => this.name.toUpperCase();
+  String get token {
+    switch (this) {
+      case TDSRequest.metar:
+      case TDSRequest.taf:
+        return this.name.toUpperCase();
+      case TDSRequest.station:
+        return "Station";
+    }
+  }
 
 
   Type get type {
@@ -28,7 +36,7 @@ enum TDSRequest {
       case TDSRequest.taf:
         return TafTDS;
       case TDSRequest.station:
-        return StationTDS; // does not exist
+        return StationTDS;
     }
   }
 
@@ -39,18 +47,18 @@ enum TDSRequest {
       case TDSRequest.taf:
         return TafTDS.fromElement(element);
       case TDSRequest.station:
-        return StationTDS.fromElement(element); // does not exist
+        return StationTDS.fromElement(element);
     }
   }
 
   String get cachedPath {
     switch (this) {
       case TDSRequest.metar:
-        return dataServerPath + "current/metars.cache.xml";
+        return dataServerPath + "metars.cache.xml";
       case TDSRequest.taf:
-        return dataServerPath + "current/tafs.cache.xml";
+        return dataServerPath + "tafs.cache.xml";
       case TDSRequest.station:
-        return "assets/stations.xml"; // does not exist
+        return dataServerPath + 'stations.cache.xml';
     }
   }
 
@@ -61,10 +69,9 @@ enum TDSRequest {
       switch (this) {
         case TDSRequest.metar:
         case TDSRequest.taf:
+        case TDSRequest.station:
           Response response = await get(Uri.parse(link));
           return response.body;
-        case TDSRequest.station:
-          return "";
       }
     } on Exception catch(e) {
       return "";
@@ -79,11 +86,10 @@ enum TDSRequest {
       switch (this) {
         case TDSRequest.metar:
         case TDSRequest.taf:
+        case TDSRequest.station:
           Response response = await get(Uri.parse(link));
           bytes = response.bodyBytes.toList();
           break;
-        case TDSRequest.station:
-          return "";
       }
       final decoder = GZipDecoder();
       final result  = decoder.decodeBytes(bytes);

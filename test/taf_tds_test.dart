@@ -13,6 +13,7 @@ void main () {
     expect(eddv != null, true);
     expect(eddv!.station_id, 'EDDV');
     print(eddv.station_id);
+    print(eddv.raw_text);
   });
 
 }

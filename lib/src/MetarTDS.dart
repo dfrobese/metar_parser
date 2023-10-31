@@ -29,12 +29,15 @@ class MetarTDS  implements TDSElement, FlightCategoryRelated {
     if (dir.length > 0) {
       // developer.log('wind found', name: 'my.app.category');
     }
-
-    var wind_dir_degrees = double.parse(metarElement.getElement('wind_dir_degrees')?.text ?? "0");
+    var dirString = metarElement.getElement('wind_dir_degrees')?.text ?? "0";
+    
+    var wind_dir_degrees = dirString == "VRB" ? 0.0 : double.parse(dirString);
 
     var wind_speed_kt = double.parse(metarElement.getElement('wind_speed_kt')?.text ?? "0");
     var wind_gust_kt = double.parse(metarElement.getElement('wind_gust_kt')?.text ?? "0");
-    var visibility_statute_mi = double.parse(metarElement.getElement('visibility_statute_mi')?.text ?? "0");
+
+    var match = RegExp(r'\d+').firstMatch(metarElement.getElement('visibility_statute_mi')?.text ?? "0");
+    var visibility_statute_mi = double.parse(match?[0] ?? "0");
     var altim_in_hg = double.parse(metarElement.getElement('altim_in_hg')?.text ?? "0");
     var flight_category = FlightCategory.parse(metarElement.getElement('flight_category')?.text ?? "NONE");
     var wx_string = metarElement.getElement('wx_string')?.text ?? "";
@@ -42,7 +45,6 @@ class MetarTDS  implements TDSElement, FlightCategoryRelated {
 
     var precip_in = double.parse(metarElement.getElement('precip_in')?.text ?? "0");
     var elevation_m = double.parse(metarElement.getElement('elevation_m')?.text ?? "0");
-
 
 
     return MetarTDS._(raw, id, time, latitude, longitude, temp_c, dewpoint_c, wind_dir_degrees, wind_speed_kt, wind_gust_kt,
