@@ -6,9 +6,7 @@ import 'package:test/scaffolding.dart';
 
 void main () {
   test('Taf test', () async {
-    TDSRequest request = TDSRequest.taf;
-    var file = await request.readZippedFile();
-    final Map<String, TafTDS> tafs = request.parse<TafTDS>(file);
+    final Map<String, TafTDS> tafs = await TafController().fullRequest();
     final eddv = tafs['EDDV'];
     expect(eddv != null, true);
     expect(eddv!.station_id, 'EDDV');

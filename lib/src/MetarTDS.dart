@@ -8,7 +8,7 @@ import 'package:metar_dart/metar_dart.dart';
 import 'package:xml/xml.dart';
 
 
-class MetarTDS  implements TDSElement, FlightCategoryRelated {
+class MetarTDS implements TDSElement, FlightCategoryRelated {
 
 
   MetarTDS._(this.raw_text, this.station_id, this.observation_time, this.latitude, this.longitude,
@@ -52,10 +52,10 @@ class MetarTDS  implements TDSElement, FlightCategoryRelated {
   }
 
   String raw_text; //KROS 101504Z AUTO 05009G14KT 7SM DZ OVC005 08/07 A2970 RMK AO2 LTG DSNT NW P0001
-  String station_id;
+  @override String station_id;
   DateTime observation_time; //2022-11-10T15:04:00Z
   double latitude; // 45.7</latitude>d
-  double longitude; // >-92.95</longitude>
+  @override double longitude; // >-92.95</longitude>
   double temp_c; // >8.0</temp_c>
   double dewpoint_c; // >7.0</dewpoint_c>
   double wind_dir_degrees; //>50</wind_dir_degrees>

@@ -4,6 +4,8 @@ import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:metar_parser_dart/src/extension/NotifyChanges.dart';
 
 
+
+
 class TDSFetchDataException implements Exception {
   final _message;
   TDSFetchDataException([this._message]);
@@ -18,9 +20,11 @@ class TDSController<TDSElement> extends NotifyChanges {
 
   final Map<String, TDSElement> tdsDict = Map();
 
-  TDSRequest request;
+  final TDSRequest request;
 
-  TDSController(this.request);
+  TDSController(TDSRequestType type) :
+    request = TDSRequest(type);
+
 
   /// Makes a full file request of all Metars
   Future<Map<String, TDSElement>> fullRequest() async {
@@ -30,24 +34,31 @@ class TDSController<TDSElement> extends NotifyChanges {
       developer.log('ERROR file not found');
       throw new TDSFetchDataException("An error occured, file not found");
     }
-    final Map<String, TDSElement> elements = request.parse(file);
-    tdsDict.addAll(elements);
+    final map = request.parse(file);
+
+    tdsDict.addAll(map.cast<String, TDSElement>());
     notifyListeners();
     return tdsDict;
   }
+
+
 }
 
+
+
 class MetarController extends TDSController<MetarTDS>{
-  MetarController() : super(TDSRequest.metar);
+  MetarController() : super(TDSRequestType.metar);
 }
 
 
 class TafController extends TDSController<TafTDS>{
-  TafController() : super(TDSRequest.taf);
+  TafController() : super(TDSRequestType.taf);
+
 }
 
 class StationController extends TDSController<StationTDS>{
-  StationController() : super(TDSRequest.station);
+  StationController() : super(TDSRequestType.station);
+
 }
 
 

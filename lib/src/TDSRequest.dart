@@ -6,24 +6,27 @@ import 'package:metar_parser_dart/src/StationTDS.dart';
 import 'package:xml/xml.dart';
 
 
-
-abstract class TDSElement {
-
+abstract  class TDSElement {
+  String get station_id;
+  double get latitude; // 45.7</latitude>d
+  double get longitude; // >-92.95</longitude>
 }
 
 
-enum TDSRequest {
-  metar, taf, station;
+enum TDSRequestType {
+  metar,
+  taf,
+  station;
 //  final String dataServerPath = "https://aviationweather.gov/adds/dataserver_current/";
 //  final String dataServerPath = "https://aviationweather-bldr.ncep.noaa.gov/adds/dataserver_current/current/";
   final String dataServerPath = "https://aviationweather.gov/data/cache/";
 
   String get token {
     switch (this) {
-      case TDSRequest.metar:
-      case TDSRequest.taf:
+      case TDSRequestType.metar:
+      case TDSRequestType.taf:
         return this.name.toUpperCase();
-      case TDSRequest.station:
+      case TDSRequestType.station:
         return "Station";
     }
   }
@@ -31,86 +34,94 @@ enum TDSRequest {
 
   Type get type {
     switch (this) {
-      case TDSRequest.metar:
+      case TDSRequestType.metar:
         return MetarTDS;
-      case TDSRequest.taf:
+      case TDSRequestType.taf:
         return TafTDS;
-      case TDSRequest.station:
+      case TDSRequestType.station:
         return StationTDS;
     }
   }
 
-   fromElement<TDSElement>(XmlElement element) {
+  fromElement<TDSElement>(XmlElement element) {
     switch (this) {
-      case TDSRequest.metar:
+      case TDSRequestType.metar:
         return MetarTDS.fromElement(element);
-      case TDSRequest.taf:
+      case TDSRequestType.taf:
         return TafTDS.fromElement(element);
-      case TDSRequest.station:
+      case TDSRequestType.station:
         return StationTDS.fromElement(element);
     }
   }
 
   String get cachedPath {
     switch (this) {
-      case TDSRequest.metar:
+      case TDSRequestType.metar:
         return dataServerPath + "metars.cache.xml";
-      case TDSRequest.taf:
+      case TDSRequestType.taf:
         return dataServerPath + "tafs.cache.xml";
-      case TDSRequest.station:
+      case TDSRequestType.station:
         return dataServerPath + 'stations.cache.xml';
     }
   }
 
+
+}
+
+class TDSRequest {
+
+  final TDSRequestType type;
+
+  TDSRequest(this.type);
+
   /// read file based Metar/Taf/Station information with all entries
   Future<String> readFile() async {
-    String link = cachedPath;
+    String link = type.cachedPath;
     try {
-      switch (this) {
-        case TDSRequest.metar:
-        case TDSRequest.taf:
-        case TDSRequest.station:
-          Response response = await get(Uri.parse(link));
-          return response.body;
-      }
+      Response response = await get(Uri.parse(link));
+      return response.body;
     } on Exception catch(e) {
-      return "";
+      return "Read file from url $link failed";
     }
   }
 
   /// read file based Metar/Taf/Station information with all entries
   Future<String> readZippedFile() async {
-    String link = cachedPath + ".gz";
+    String link = type.cachedPath + ".gz";
     try {
       var bytes;
-      switch (this) {
-        case TDSRequest.metar:
-        case TDSRequest.taf:
-        case TDSRequest.station:
-          Response response = await get(Uri.parse(link));
-          bytes = response.bodyBytes.toList();
-          break;
-      }
+      // read bytes
+      Response response = await get(Uri.parse(link));
+      bytes = response.bodyBytes.toList();
+      // unzip file
       final decoder = GZipDecoder();
-      final result  = decoder.decodeBytes(bytes);
+      final result = decoder.decodeBytes(bytes);
       String unzipped = utf8.decode(result);
       return unzipped;
-    } on Exception catch(e) {
-      return "";
+    } on Exception catch (e) {
+      return "Read zipped file from url $link failed";
     }
   }
 
-  Map<String, TDSElement> parse<TDSElement>(String body) {
+  Map<String, TDSElement> parse(String body) {
     if (body.length < 1) {
       throw TDSFetchDataException("No connection");
     }
     var document = XmlDocument.parse(body);
     var root = document.getElement('data');
-    final elements = document.findAllElements(token);
-    final map = Map<String, TDSElement>.fromIterable(elements,
+    final elements = document.findAllElements(type.token);
+    var map = Map<String, TDSElement>.fromIterable(elements,
         key: (item) => item.getElement('station_id')?.text!,
-        value: (item) => this.fromElement<TDSElement>(item) );
+        value: (item) => type.fromElement<TDSElement>(item) );
+
+    filterFalseEntries(map);
     return map;
   }
+
+  filterFalseEntries(Map<String, TDSElement> elements)  {
+    elements.removeWhere((key, value) {
+      return (value.latitude < -90 || value.latitude > 90);});
+  }
+
 }
 
