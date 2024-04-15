@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:country/country.dart';
 import 'package:metar_dart/metar_dart.dart';
+import 'package:metar_dart/src/reports/reports.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:xml/xml.dart';
 
@@ -33,7 +34,10 @@ class TafTDS implements TDSElement {
 
    /// GPS coordinates of station
    late Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
-   late Taf taf = Taf(this.raw_text);
+   late Taf decodedTaf = Taf(this.raw_text);
+   late GroupList<MetarWeather> weathers = decodedTaf.weathers;
+   
+   void decodeComingWeather () {
 
-
+   }
 }

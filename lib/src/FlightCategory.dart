@@ -5,6 +5,9 @@ enum FlightCategory {
 
 
    factory FlightCategory.parse(String str) {
+     if (str.length<3) {
+       return FlightCategory.NONE;
+     }
      var fc = FlightCategory.values.firstWhere((e) => e.name == str.toUpperCase());
      return fc;
    }
