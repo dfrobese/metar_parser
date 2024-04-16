@@ -9,7 +9,7 @@ final tafProvider = FutureProvider<Map<String, TafTDS>>((ref) async {
   final Map<String, TafTDS> tdsDict = Map();
   final TDSRequest request;
 
-  request = TDSRequest(TDSRequestType.metar);
+  request = TDSRequest(TDSRequestType.taf);
 
   var content = await request.readZippedFile();
   final file = content.toString();
