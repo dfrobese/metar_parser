@@ -27,6 +27,7 @@ class TDSController<TDSElement> extends NotifyChanges {
 
   /// Makes a full file request of all Metars
   Future<Map<String, TDSElement>> fullRequest() async {
+    developer.log('#Metar_Parser fullRequest');
     var content = await request.readZippedFile();
     final file = content.toString();
     if (file.length < 100) {

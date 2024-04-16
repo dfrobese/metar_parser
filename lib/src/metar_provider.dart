@@ -6,6 +6,8 @@ import 'package:metar_parser_dart/src/TDSRequest.dart';
 
 final metarProvider = FutureProvider<Map<String, MetarTDS>>((ref) async {
 
+  developer.log('#Metar_Provider fullRequest');
+
   final Map<String, MetarTDS> tdsDict = Map();
   final TDSRequest request;
 

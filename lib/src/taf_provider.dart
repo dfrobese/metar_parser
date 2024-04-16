@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
 
 
-final taFProvider = FutureProvider<Map<String, TafTDS>>((ref) async {
-
+final tafProvider = FutureProvider<Map<String, TafTDS>>((ref) async {
+  developer.log('#Taf_Provider fullRequest');
   final Map<String, TafTDS> tdsDict = Map();
   final TDSRequest request;
 
