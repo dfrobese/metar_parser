@@ -5,7 +5,6 @@ import 'package:metar_parser_dart/src/extension/NotifyChanges.dart';
 
 
 
-
 class TDSFetchDataException implements Exception {
   final _message;
   TDSFetchDataException([this._message]);
