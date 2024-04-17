@@ -8,3 +8,4 @@ export 'src/FlightCategory.dart';
 export 'src/TDSController.dart';
 export 'src/metar_provider.dart';
 export 'src/taf_provider.dart';
+export 'src/station_provider.dart';
