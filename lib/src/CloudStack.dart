@@ -45,7 +45,10 @@ class CloudStack extends CloudList<CloudLayer> {
     return stack;
   }
 
-  double _lowestSignificantCloudBase() {
+  double? _lowestSignificantCloudBase() {
+    if (this.isEmpty) {
+       return null;
+    }
     var lowestAGL = CloudCoverage.SKC.defaultCloudbase;
     this.forEach((element) {
           if (element.coverage.cloudCover >= CloudCoverage.BKN.cloudCover &&
@@ -56,6 +59,6 @@ class CloudStack extends CloudList<CloudLayer> {
     return lowestAGL;
   }
 
-  late double lowestSignificantCloudBase = this._lowestSignificantCloudBase();
+  late double? lowestSignificantCloudBase = this._lowestSignificantCloudBase();
 }
 

@@ -30,22 +30,25 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
       // developer.log('wind found', name: 'my.app.category');
     }
     var dirString = metarElement.getElement('wind_dir_degrees')?.text ?? "0";
-    
     var wind_dir_degrees = dirString == "VRB" ? 0.0 : double.parse(dirString);
-
     var wind_speed_kt = double.parse(metarElement.getElement('wind_speed_kt')?.text ?? "0");
     var wind_gust_kt = double.parse(metarElement.getElement('wind_gust_kt')?.text ?? "0");
 
-    var match = RegExp(r'\d+').firstMatch(metarElement.getElement('visibility_statute_mi')?.text ?? "0");
-    var visibility_statute_mi = double.parse(match?[0] ?? "0");
-    var altim_in_hg = double.parse(metarElement.getElement('altim_in_hg')?.text ?? "0");
+    var visibility_statute_mi = null;
+    var visibilityStr = metarElement.getElement('visibility_statute_mi')?.text;
+    if (visibilityStr != null) {
+      var match = RegExp(r'\d+').firstMatch(visibilityStr);
+      if (match != null && match[0] != null) {
+        visibility_statute_mi = double.parse(match[0]!);
+      }
+    }
+   var altim_in_hg = double.parse(metarElement.getElement('altim_in_hg')?.text ?? "0");
     var flight_category = FlightCategory.parse(metarElement.getElement('flight_category')?.text ?? "NONE");
     var wx_string = metarElement.getElement('wx_string')?.text ?? "";
     var sky_condition = CloudStack.fromElement(metarElement);
 
     var precip_in = double.parse(metarElement.getElement('precip_in')?.text ?? "0");
     var elevation_m = double.parse(metarElement.getElement('elevation_m')?.text ?? "0");
-
 
     return MetarTDS._(raw, id, time, latitude, longitude, temp_c, dewpoint_c, wind_dir_degrees, wind_speed_kt, wind_gust_kt,
     visibility_statute_mi, altim_in_hg, wx_string, sky_condition, flight_category, precip_in, elevation_m);
@@ -61,7 +64,7 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
   double wind_dir_degrees; //>50</wind_dir_degrees>
   double wind_speed_kt; // >9</wind_speed_kt>
   double wind_gust_kt; // >14</wind_gust_kt>
-  double visibility_statute_mi; // >7.0</visibility_statute_mi>
+  double ?visibility_statute_mi; // >7.0</visibility_statute_mi>
   double altim_in_hg; //>29.698818</altim_in_hg>
   // <quality_control_flags>
   // <auto>TRUE</auto>
@@ -78,9 +81,9 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
    /// GPS coordinates of station
    late Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
    /// horizontal visibility in status miles
-   double get visibility => this.visibility_statute_mi;
+   double? get visibility => this.visibility_statute_mi;
    /// base AGL of lowest significant cloud
-   late double lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
+   late double? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
    /// Flight category VFR, MVFR, IFR or LIFR
    FlightCategory get flightCategory => this._flight_category == FlightCategory.NONE ? FlightCategory.calc(this) : this._flight_category;
    /// parsed metar information from raw string
@@ -92,7 +95,4 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
 
 
 /// TODO  Visible runway length
-
-
-
 }

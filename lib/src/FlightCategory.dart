@@ -24,6 +24,10 @@ enum FlightCategory {
      var limit = val.visibility;
      var lowest = val.lowestSignificantCloudBase;
 
+     if (limit == null || lowest == null) {
+        return FlightCategory.NONE;
+     }
+
      if (limit < 1 || lowest < 500) {
        return FlightCategory.LIFR;
      } else if (limit < 3) {
@@ -48,9 +52,9 @@ enum FlightCategory {
 
 abstract class  FlightCategoryRelated {
   /// get visibilty in status miles SM
-  double get visibility;
+  double? get visibility;
   /// get lowest significant cloudbase in feet
-  double get lowestSignificantCloudBase;
+  double? get lowestSignificantCloudBase;
 }
 
 

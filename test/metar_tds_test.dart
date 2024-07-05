@@ -17,10 +17,10 @@ void main () {
     print(eddv.visibility_statute_mi);
     expect(eddv.wind.direction, eddv.moreWind.direction);
     expect(eddv.wind.speed, eddv.moreWind.speed);
+    expect((eddv.flightCategory != FlightCategory.NONE), true);
     metars.values.toList().forEach((element) {
       expect((element.latitude > 90 || element.latitude < -90), false,reason: "Station ${element.station_id}");
     });
-
 
     metars.values.toList().forEach((element) {
       expect((element.latitude > 90 || element.latitude < -90), false,reason: "Station ${element.station_id}");
