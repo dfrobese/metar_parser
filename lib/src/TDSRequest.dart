@@ -48,7 +48,7 @@ enum TDSRequestType {
       case TDSRequestType.metar:
         return MetarTDS.fromElement(element);
       case TDSRequestType.taf:
-        return TafTDS.fromElement(element);
+        return TafTDS.fromXml(element);
       case TDSRequestType.station:
         return StationTDS.fromElement(element);
     }

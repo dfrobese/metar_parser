@@ -44,8 +44,6 @@ class TDSController<TDSElement> extends NotifyChanges {
 
 }
 
-
-
 class MetarController extends TDSController<MetarTDS>{
   MetarController() : super(TDSRequestType.metar);
 }

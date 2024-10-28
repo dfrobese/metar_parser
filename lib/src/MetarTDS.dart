@@ -7,6 +7,8 @@ import 'package:country/country.dart';
 import 'package:metar_dart/metar_dart.dart';
 import 'package:xml/xml.dart';
 
+import 'PresentWeather.dart';
+
 
 class MetarTDS implements TDSElement, FlightCategoryRelated {
 
@@ -17,38 +19,38 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
       this.precip_in, this.elevation_m);
 
   factory MetarTDS.fromElement(XmlElement metarElement) {
-    var raw = metarElement.getElement('raw_text')?.text ?? "";
-    var id = metarElement.getElement('station_id')?.text ?? "";
-    var time = DateTime.parse(metarElement.getElement('observation_time')?.text ?? DateTime.now().toString());
-    var latitude = double.parse(metarElement.getElement('latitude')?.text ?? "0");
-    var longitude = double.parse(metarElement.getElement('longitude')?.text ?? "0");
-    var temp_c = double.parse(metarElement.getElement('temp_c')?.text ?? "0");
-    var dewpoint_c = double.parse(metarElement.getElement('dewpoint_c')?.text ?? "0");
+    var raw = metarElement.getElement('raw_text')?.innerText ?? "";
+    var id = metarElement.getElement('station_id')?.innerText ?? "";
+    var time = DateTime.parse(metarElement.getElement('observation_time')?.innerText ?? DateTime.now().toString());
+    var latitude = double.parse(metarElement.getElement('latitude')?.innerText ?? "0");
+    var longitude = double.parse(metarElement.getElement('longitude')?.innerText ?? "0");
+    var temp_c = double.parse(metarElement.getElement('temp_c')?.innerText ?? "0");
+    var dewpoint_c = double.parse(metarElement.getElement('dewpoint_c')?.innerText ?? "0");
 
     var dir = metarElement.findElements('wind_dir_degrees');
     if (dir.length > 0) {
       // developer.log('wind found', name: 'my.app.category');
     }
-    var dirString = metarElement.getElement('wind_dir_degrees')?.text ?? "0";
+    var dirString = metarElement.getElement('wind_dir_degrees')?.innerText ?? "0";
     var wind_dir_degrees = dirString == "VRB" ? 0.0 : double.parse(dirString);
-    var wind_speed_kt = double.parse(metarElement.getElement('wind_speed_kt')?.text ?? "0");
-    var wind_gust_kt = double.parse(metarElement.getElement('wind_gust_kt')?.text ?? "0");
+    var wind_speed_kt = double.parse(metarElement.getElement('wind_speed_kt')?.innerText ?? "0");
+    var wind_gust_kt = double.parse(metarElement.getElement('wind_gust_kt')?.innerText ?? "0");
 
     var visibility_statute_mi = null;
-    var visibilityStr = metarElement.getElement('visibility_statute_mi')?.text;
+    var visibilityStr = metarElement.getElement('visibility_statute_mi')?.innerText;
     if (visibilityStr != null) {
       var match = RegExp(r'\d+').firstMatch(visibilityStr);
       if (match != null && match[0] != null) {
         visibility_statute_mi = double.parse(match[0]!);
       }
     }
-   var altim_in_hg = double.parse(metarElement.getElement('altim_in_hg')?.text ?? "0");
-    var flight_category = FlightCategory.parse(metarElement.getElement('flight_category')?.text ?? "NONE");
-    var wx_string = metarElement.getElement('wx_string')?.text ?? "";
+   var altim_in_hg = double.parse(metarElement.getElement('altim_in_hg')?.innerText ?? "0");
+    var flight_category = FlightCategory.parse(metarElement.getElement('flight_category')?.innerText ?? "NONE");
+    var wx_string = metarElement.getElement('wx_string')?.innerText;
     var sky_condition = CloudStack.fromElement(metarElement);
 
-    var precip_in = double.parse(metarElement.getElement('precip_in')?.text ?? "0");
-    var elevation_m = double.parse(metarElement.getElement('elevation_m')?.text ?? "0");
+    var precip_in = double.parse(metarElement.getElement('precip_in')?.innerText ?? "0");
+    var elevation_m = double.parse(metarElement.getElement('elevation_m')?.innerText ?? "0");
 
     return MetarTDS._(raw, id, time, latitude, longitude, temp_c, dewpoint_c, wind_dir_degrees, wind_speed_kt, wind_gust_kt,
     visibility_statute_mi, altim_in_hg, wx_string, sky_condition, flight_category, precip_in, elevation_m);
@@ -70,7 +72,7 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
   // <auto>TRUE</auto>
   // <auto_station>TRUE</auto_station>
   // </quality_control_flags>
-  String wx_string; // >DZ</wx_string>
+  String ?wx_string; // >DZ</wx_string>
   CloudStack sky_condition; // sky_cover="OVC" cloud_base_ft_agl="500"/>
   FlightCategory _flight_category; //>IFR</flight_category>
   double precip_in; // >0.01</precip_in>
@@ -92,7 +94,7 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
    late Wind wind = Wind(wind_speed_kt, wind_dir_degrees, wind_gust_kt);
    /// More Wind
    late Wind moreWind = Wind(metar.wind.speedInKnot ?? 0, metar.wind.directionInDegrees ?? 0, metar.wind.gustInKnot ?? 0, metar.windVariation.fromInDegrees, metar.windVariation.toInDegrees);
-
-
+   /// Decoded weather or null if not reported
+   late PresentWeather? weather = wx_string != null ? PresentWeather.parse(wx_string!) : null;
 /// TODO  Visible runway length
 }

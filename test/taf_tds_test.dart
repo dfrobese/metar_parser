@@ -11,7 +11,8 @@ void main () {
     expect(eddv != null, true);
     expect(eddv!.station_id, 'EDDV');
     print(eddv.station_id);
-    print(eddv.raw_text);
+    print(eddv.rawText);
+    eddv.forecasts.forEach((forecast) {print("PROB ${forecast.probability} Change ${forecast.changeIndicator} Wind  ${forecast.windSpeedKt}");});
   });
 
 }

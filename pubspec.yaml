@@ -9,11 +9,11 @@ environment:
   sdk: ">=2.17.0 <4.0.0"
 
 dependencies:
-  xml:  ^6.4.2
-  country: ^4.0.0
+  xml:  ^6.5.0
+  country: ^4.1.9
   units_converter: ^2.1.1
   metar_dart: ^0.3.2
-  archive: ^3.3.6
+  archive: ^3.6.1
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
 

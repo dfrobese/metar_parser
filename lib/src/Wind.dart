@@ -27,12 +27,12 @@ class Wind {
   /// Wind speed in knots
   final double speed;
   /// Wind gusts in knots
-  final double gust;
+  final double ?gust;
 
-  const Wind(this.direction, this.speed, this.gust, [this.dir_from , this.dir_to]);
+  const Wind(this.direction, this.speed, [this.gust, this.dir_from , this.dir_to]);
 
   /// Return true if gusty wind condition
-  bool get isGusty => gust > 0;
+  bool get isGusty => (gust != null && gust! > 0);
   /// Return variable or not
   bool get isVariable => direction == 0;
 }
