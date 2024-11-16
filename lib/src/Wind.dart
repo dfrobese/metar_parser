@@ -4,6 +4,9 @@ enum WindUnit {
 
   static final List<String> unitStr = ["kt", "m/s", "km/h"];
 
+  // Wind regexp
+  static  final String regStr = WindUnit.values.map((e){return e.name;}).join("|");
+
   /// Create object from string
   factory WindUnit.parse(String str) {
     var cl = WindUnit.values.firstWhere((e) => e.name == str.toUpperCase());

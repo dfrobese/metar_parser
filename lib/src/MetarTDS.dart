@@ -1,4 +1,5 @@
 
+import 'dart:developer' as developer;
 import 'package:metar_parser_dart/src/CloudStack.dart';
 import 'package:metar_parser_dart/src/FlightCategory.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
@@ -6,11 +7,39 @@ import 'package:metar_parser_dart/src/Wind.dart';
 import 'package:country/country.dart';
 import 'package:metar_dart/metar_dart.dart';
 import 'package:xml/xml.dart';
-
+import 'CloudCoverage.dart';
 import 'PresentWeather.dart';
 
 
 class MetarTDS implements TDSElement, FlightCategoryRelated {
+
+
+
+
+
+  String raw_text; //KROS 101504Z AUTO 05009G14KT 7SM DZ OVC005 08/07 A2970 RMK AO2 LTG DSNT NW P0001
+  @override String station_id;
+  DateTime observation_time; //2022-11-10T15:04:00Z
+  double latitude; // 45.7</latitude>d
+  @override double longitude; // >-92.95</longitude>
+  double temp_c; // >8.0</temp_c>
+  double dewpoint_c; // >7.0</dewpoint_c>
+  double wind_dir_degrees; //>50</wind_dir_degrees>
+  double wind_speed_kt; // >9</wind_speed_kt>
+  double wind_gust_kt; // >14</wind_gust_kt>
+  double ?visibility_statute_mi; // >7.0</visibility_statute_mi>
+  double altim_in_hg; //>29.698818</altim_in_hg>
+  // <quality_control_flags>
+  // <auto>TRUE</auto>
+  // <auto_station>TRUE</auto_station>
+  // </quality_control_flags>
+  String ?wx_string; // >DZ</wx_string>
+  CloudStack sky_condition; // sky_cover="OVC" cloud_base_ft_agl="500"/>
+  FlightCategory _flight_category; //>IFR</flight_category>
+  double precip_in; // >0.01</precip_in>
+  // <metar_type>METAR</metar_type>
+  double elevation_m; //>282.0</elevation_m>
+  //
 
 
   MetarTDS._(this.raw_text, this.station_id, this.observation_time, this.latitude, this.longitude,
@@ -56,30 +85,6 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
     visibility_statute_mi, altim_in_hg, wx_string, sky_condition, flight_category, precip_in, elevation_m);
   }
 
-  String raw_text; //KROS 101504Z AUTO 05009G14KT 7SM DZ OVC005 08/07 A2970 RMK AO2 LTG DSNT NW P0001
-  @override String station_id;
-  DateTime observation_time; //2022-11-10T15:04:00Z
-  double latitude; // 45.7</latitude>d
-  @override double longitude; // >-92.95</longitude>
-  double temp_c; // >8.0</temp_c>
-  double dewpoint_c; // >7.0</dewpoint_c>
-  double wind_dir_degrees; //>50</wind_dir_degrees>
-  double wind_speed_kt; // >9</wind_speed_kt>
-  double wind_gust_kt; // >14</wind_gust_kt>
-  double ?visibility_statute_mi; // >7.0</visibility_statute_mi>
-  double altim_in_hg; //>29.698818</altim_in_hg>
-  // <quality_control_flags>
-  // <auto>TRUE</auto>
-  // <auto_station>TRUE</auto_station>
-  // </quality_control_flags>
-  String ?wx_string; // >DZ</wx_string>
-  CloudStack sky_condition; // sky_cover="OVC" cloud_base_ft_agl="500"/>
-  FlightCategory _flight_category; //>IFR</flight_category>
-  double precip_in; // >0.01</precip_in>
-  // <metar_type>METAR</metar_type>
-  double elevation_m; //>282.0</elevation_m>
-  //
-
    /// GPS coordinates of station
    late Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
    /// horizontal visibility in status miles
@@ -96,5 +101,5 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
    late Wind moreWind = Wind(metar.wind.speedInKnot ?? 0, metar.wind.directionInDegrees ?? 0, metar.wind.gustInKnot ?? 0, metar.windVariation.fromInDegrees, metar.windVariation.toInDegrees);
    /// Decoded weather or null if not reported
    late PresentWeather? weather = wx_string != null ? PresentWeather.parse(wx_string!) : null;
-/// TODO  Visible runway length
 }
+
