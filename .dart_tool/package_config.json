@@ -3,21 +3,15 @@
   "packages": [
     {
       "name": "_fe_analyzer_shared",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/_fe_analyzer_shared-72.0.0",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/_fe_analyzer_shared-67.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
-    },
-    {
-      "name": "_macros",
-      "rootUri": "file:///C:/Users/frobe/flutter/bin/cache/dart-sdk/pkg/_macros",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.0"
     },
     {
       "name": "analyzer",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/analyzer-6.7.0",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/analyzer-6.4.1",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.0"
     },
     {
       "name": "analyzer_plugin",
@@ -75,15 +69,15 @@
     },
     {
       "name": "build_runner",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner-2.4.13",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner-2.4.11",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.4"
     },
     {
       "name": "build_runner_core",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner_core-7.3.2",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner_core-7.3.1",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.4"
     },
     {
       "name": "built_collection",
@@ -159,25 +153,25 @@
     },
     {
       "name": "custom_lint",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/custom_lint-0.6.8",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/custom_lint-0.6.4",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "custom_lint_builder",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/custom_lint_builder-0.6.8",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/custom_lint_builder-0.6.4",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "custom_lint_core",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/custom_lint_core-0.6.5",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/custom_lint_core-0.6.3",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "dart_style",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/dart_style-2.3.7",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/dart_style-2.3.6",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -278,12 +272,6 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "macros",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/macros-0.1.2-main.4",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
       "name": "matcher",
       "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/matcher-0.12.16+1",
       "packageUri": "lib/",
@@ -291,13 +279,13 @@
     },
     {
       "name": "material_color_utilities",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/material_color_utilities-0.11.1",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/material_color_utilities-0.8.0",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
     {
       "name": "meta",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.15.0",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.12.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -309,7 +297,7 @@
     },
     {
       "name": "mime",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/mime-2.0.0",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/mime-1.0.6",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -363,7 +351,7 @@
     },
     {
       "name": "riverpod_analyzer_utils",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/riverpod_analyzer_utils-0.5.6",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/riverpod_analyzer_utils-0.5.1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -375,19 +363,19 @@
     },
     {
       "name": "riverpod_generator",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/riverpod_generator-2.6.1",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/riverpod_generator-2.4.0",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
     {
       "name": "riverpod_lint",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/riverpod_lint-2.6.1",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/riverpod_lint-2.3.10",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
     {
       "name": "rxdart",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/rxdart-0.28.0",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/rxdart-0.27.7",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -411,9 +399,9 @@
     },
     {
       "name": "shelf_web_socket",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/shelf_web_socket-2.0.0",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/shelf_web_socket-1.0.4",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "2.17"
     },
     {
       "name": "sky_engine",
@@ -489,21 +477,21 @@
     },
     {
       "name": "test",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/test-1.25.8",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/test-1.25.2",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.0"
     },
     {
       "name": "test_api",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.3",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.0",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.0"
     },
     {
       "name": "test_core",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/test_core-0.6.5",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/test_core-0.6.0",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.0"
     },
     {
       "name": "timing",
@@ -519,9 +507,9 @@
     },
     {
       "name": "typed_data",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.4.0",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.3.2",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "2.17"
     },
     {
       "name": "units_converter",
@@ -555,19 +543,13 @@
     },
     {
       "name": "web",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/web-1.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
-      "name": "web_socket",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket-0.1.6",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/web-0.5.1",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
       "name": "web_socket_channel",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket_channel-3.0.1",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket_channel-2.4.5",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
@@ -596,10 +578,10 @@
       "languageVersion": "2.17"
     }
   ],
-  "generated": "2024-11-15T14:55:48.222865Z",
+  "generated": "2024-11-16T19:42:47.813914Z",
   "generator": "pub",
-  "generatorVersion": "3.5.1",
+  "generatorVersion": "3.4.3",
   "flutterRoot": "file:///C:/Users/frobe/flutter",
-  "flutterVersion": "3.24.1",
+  "flutterVersion": "3.22.2",
   "pubCache": "file:///C:/Users/frobe/AppData/Local/Pub/Cache"
 }

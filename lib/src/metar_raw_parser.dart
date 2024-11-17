@@ -33,25 +33,25 @@ enum MetarRawElement {
       case mode:
         return r'(COR|AUTO|NIL|CNL|AMD)\s+';
       case windVaries:
-        return r'\s(\d{3})V(\d{3})';
+        return r'(\d{3})V(\d{3})';
       case windVRB:
         return 'VRB(\\d{2})(${WindUnit.regStr})';
       case wind:
         return '(\\d{3})(\\d{2})(G\\d{2})?(${WindUnit.regStr})?';
-      case rvr:
-        return "(R\\d{2}(\\w)?/([A-Z])?\\d{4}(V\\d{4})?(${RVRTrend.regStr})\\s)+";
       case visibility:
-        return r'(CAVOK|\d{4}|(?:P?\d{1,2}SM))';
+        return r'(?:(P?\d{1,2}|((\d\s)?\d\/\d))SM)|(?:(\d{4}([NSWE]{1,2})?)(\s\d{4}([NSWE]{1,2})?)?)';
+      case rvr:
+        return "(R\\d{2}(\\w)?\\/([A-Z])?\\d{4}(V\\d{4})?(${RVRTrend.regStr})\\s)+";
       case weather:
-        return "((?:\\+|-|\\s|VC|RE)?(${PresentWeather.descriptorRegStr})?(${PresentWeather.precipitationRegStr}){1,2}|(${PresentWeather.obscurationRegStr}|${PresentWeather.otherReStr}))+";
+        return "(?:((\\+|-|\\s|VC|RE)?(${PresentWeather.descriptorRegStr})?(${PresentWeather.precipitationRegStr}){1,2}|(${PresentWeather.obscurationRegStr}|${PresentWeather.otherReStr}))\\s)+";
       case clouds:
-        return "(((${CloudCoverage.regStr})\\d{3})(CB|TCU)?\\s)+";
+        return "((${CloudCoverage.regSpecStr})|(((${CloudCoverage.regCloudStr})(\\d{3}|\\/{3})(CB|TCU)?\\s)+))";
       case temperature:
         return r'(M?\d{2})\/(M?\d{2})';
       case altimeter:
         return r'((?:Q|A)\d{4})';
       case change:
-        return "(NOSIG|((BECMG|TEMPO)\\s+\\d{4}(?:\\s[+-]?[A-Z]{2,4})?\\s?(?:${CloudCoverage.regStr})\\d{3}))";
+        return "(NOSIG|((BECMG|TEMPO)\\s(?:${MetarRawElement.wind.regExpString}\\s?)?(?:${MetarRawElement.visibility.regExpString}\\s?)?(?:${MetarRawElement.weather.regExpString})?(?:${MetarRawElement.clouds.regExpString})?))";
       case remark:
         return r'(RMK.+)';
 
@@ -65,14 +65,14 @@ enum MetarRawElement {
 class MetarRawParser {
 static Map<String, String?> parseMetarRawText(String metar) {
   Map<String, String?> parsedMetar = {};
-  String remaining = metar;
+  String remaining = metar+"\n"; // Add CR als end marker
 
 
     for (var element in MetarRawElement.values) {
       final match = RegExp(element.regExpString).firstMatch(remaining);
-      if (match != null) {
+      if (match != null && match.start == 0) {
         parsedMetar[element.name] = match.group(0)?.trim();
-        remaining = remaining.substring(match.end).trim();
+        remaining = remaining.substring(match.end).trimLeft(); // keep end marker
       }
     }
     // Exit if no match is found in current remaining string

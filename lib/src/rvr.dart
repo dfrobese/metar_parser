@@ -25,7 +25,7 @@ enum RVRTrend {
 
   String get description => symbol;
 
-  static final String regStr =  RVRTrend.values.join("|");
+  static final String regStr =  RVRTrend.values.map((e){return e.rawValue;}).join("|");
 }
 /// Describes Runway Visual Range (RVR)
 ///
