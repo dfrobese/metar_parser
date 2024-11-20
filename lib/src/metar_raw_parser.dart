@@ -5,9 +5,11 @@ import 'package:metar_parser_dart/src/rvr.dart';
 import 'CloudCoverage.dart';
 
 enum MetarRawElement {
-  type,
+  typeMetar,
+  typeTaf,
   station,
   published,
+  endurance,
   mode,
   wind,
   windVRB,
@@ -18,18 +20,25 @@ enum MetarRawElement {
   clouds,
   temperature,
   altimeter,
-  change,
-  remark;
+  changeMetar,
+  changeTaf,
+  remark,
+  icingGroup,
+  turbulenceGroup;
 
   // Method to generate dynamic regex pattern for each element
   String get regExpString {
     switch (this) {
-      case type:
+      case typeMetar:
         return r'(METAR|SPECI)?';
+      case typeTaf:
+        return r'(TAF)';
       case station:
         return r'([A-Z0-9]{4})\s+';
       case published:
-        return r'(\d{2})(\d{2})(\d{2})Z\s+';
+        return r'(?:(\d{2}\d{2}\d{2}Z))\s+';
+      case endurance:
+        return r'(\d{2}\d{2})\/(\d{2}\d{2})\s+';
       case mode:
         return r'(COR|AUTO|NIL|CNL|AMD)\s+';
       case windVaries:
@@ -49,26 +58,36 @@ enum MetarRawElement {
       case temperature:
         return r'(M?\d{2})\/(M?\d{2})';
       case altimeter:
-        return r'((?:Q|A)\d{4})';
-      case change:
+        return r'((?:QNH|Q|A)\d{4})(INS|HPA)?';
+      case changeMetar:
         return "(NOSIG|((BECMG|TEMPO)\\s(?:${MetarRawElement.wind.regExpString}\\s?)?(?:${MetarRawElement.visibility.regExpString}\\s?)?(?:${MetarRawElement.weather.regExpString})?(?:${MetarRawElement.clouds.regExpString})?))";
+      case changeTaf:
+        return r'(BECMG|TEMPO|(PROB\d{2}(\sTEMPO\s)?))';
       case remark:
         return r'(RMK.+)';
-
+      case icingGroup:
+        return r'(6\d{5})';
+      case turbulenceGroup:
+        return r'(5\d{5})';
         break;
     }
     return "";
   }
+  static const metarSequence = [typeMetar, station, published, mode, wind, windVRB, windVaries, visibility,
+    rvr, weather, clouds, temperature, altimeter, changeMetar, remark];
+  static const tafStartSequence = [typeTaf, mode,station, published, endurance, wind, windVRB, windVaries, visibility, weather, clouds, temperature, altimeter];
+  static const tafChangeSequence = [changeTaf, endurance, wind, windVRB, windVaries, visibility, weather, clouds, temperature, altimeter];
+  static const tafEndSequence = [mode, remark];
 }
 
 
-class MetarRawParser {
+class MetarTafRawParser {
 static Map<String, String?> parseMetarRawText(String metar) {
   Map<String, String?> parsedMetar = {};
   String remaining = metar+"\n"; // Add CR als end marker
 
 
-    for (var element in MetarRawElement.values) {
+    for (var element in MetarRawElement.metarSequence) {
       final match = RegExp(element.regExpString).firstMatch(remaining);
       if (match != null && match.start == 0) {
         parsedMetar[element.name] = match.group(0)?.trim();
@@ -78,4 +97,49 @@ static Map<String, String?> parseMetarRawText(String metar) {
     // Exit if no match is found in current remaining string
     return parsedMetar;
   }
+
+static List<Map<String, String?>> parseTafRawText(String taf) {
+
+  String remaining = taf+"\n"; // Add CR als end marker
+  List<Map<String, String?>> result = [];
+
+  // start sequence
+  Map<String, String?> parsedTafStart = {};
+  for (var element in MetarRawElement.tafStartSequence) {
+    final match = RegExp(element.regExpString).firstMatch(remaining);
+    if (match != null && match.start == 0) {
+      parsedTafStart[element.name] = match.group(0)?.trim();
+      remaining = remaining.substring(match.end).trimLeft(); // keep end marker
+    }
+  }
+  result.add(parsedTafStart);
+
+  // change sequence loop
+  while (RegExp(MetarRawElement.changeTaf.regExpString).firstMatch(remaining) != null) {
+    // change sequence
+    Map<String, String?> parsedTafChange = {};
+    for (var element in MetarRawElement.tafChangeSequence) {
+      final match = RegExp(element.regExpString).firstMatch(remaining);
+      if (match != null && match.start == 0) {
+        parsedTafChange[element.name] = match.group(0)?.trim();
+        remaining =
+            remaining.substring(match.end).trimLeft(); // keep end marker
+      }
+    }
+    result.add(parsedTafChange);
+  }
+  // End sequence
+  Map<String, String?> parsedTafEnd = {};
+  for (var element in MetarRawElement.tafEndSequence) {
+    final match = RegExp(element.regExpString).firstMatch(remaining);
+    if (match != null && match.start == 0) {
+      parsedTafEnd[element.name] = match.group(0)?.trim();
+      remaining = remaining.substring(match.end).trimLeft(); // keep end marker
+    }
+  }
+  result.add(parsedTafEnd);
+
+  // Exit if no match is found in current remaining string
+  return result;
+}
 }
