@@ -17,8 +17,7 @@ class TafTDS implements TDSElement{
   final DateTime validTimeTo;
   final double latitude;
   final double longitude;
-  final double elevationM;
-  final List<Forecast> forecasts;
+  final XmlElement tafElement;
 
   TafTDS({
     required this.rawText,
@@ -29,8 +28,7 @@ class TafTDS implements TDSElement{
     required this.validTimeTo,
     required this.latitude,
     required this.longitude,
-    required this.elevationM,
-    required this.forecasts,
+    required this.tafElement
   });
 
   factory TafTDS.fromXml(XmlElement xml) {
@@ -43,12 +41,13 @@ class TafTDS implements TDSElement{
       validTimeTo: DateTime.parse(xml.getElement('valid_time_to')?.innerText ?? DateTime.now().toString()),
       latitude: double.parse(xml.getElement('latitude')?.innerText ?? '0'),
       longitude: double.parse(xml.getElement('longitude')?.innerText ?? '0'),
-      elevationM: double.parse(xml.getElement('elevation_m')?.innerText ?? '0'),
-      forecasts: xml.findElements('forecast').map((e) => Forecast.fromXml(e)).toList(),
+      tafElement: xml
     );
   }
   /// Station ID ICAO 4 letter
   @override String get station_id => stationId;
+  late double elevationM = double.parse(tafElement.getElement('elevation_m')?.innerText ?? '0');
+  late List<Forecast>forecasts =  tafElement.findElements('forecast').map((e) => Forecast.fromXml(e)).toList();
 
   /// GPS coordinates of station
   late Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
@@ -59,12 +58,12 @@ class Forecast {
   final DateTime fcstTimeTo;
   final String? changeIndicator;
   final int? probability;
-  final XmlElement tafElement;
+  final XmlElement fcstElement;
 
   Forecast({
     required this.fcstTimeFrom,
     required this.fcstTimeTo,
-    required this.tafElement,
+    required this.fcstElement,
     this.changeIndicator,
     this.probability,
   });
@@ -73,7 +72,7 @@ class Forecast {
     return Forecast(
       fcstTimeFrom: DateTime.parse(xml.getElement('fcst_time_from')?.innerText ?? DateTime.now().toString()),
       fcstTimeTo: DateTime.parse(xml.getElement('fcst_time_to')?.innerText ?? DateTime.now().toString()),
-      tafElement: xml,
+      fcstElement: xml,
       probability: int.tryParse(xml.getElement('probability')?.innerText ?? ''),
       changeIndicator: xml.getElement('change_indicator')?.innerText,
 
@@ -81,22 +80,22 @@ class Forecast {
   }
 
   /// get wind parameters
-  late Wind wind = Wind.fromElement(tafElement);
+  late Wind wind = Wind.fromElement(fcstElement);
   /// weather text
-  late String? wx_string = tafElement.getElement('wx_string')?.innerText;
+  late String? wx_string = fcstElement.getElement('wx_string')?.innerText;
   /// Decoded weather or null if not reported
   late PresentWeather? weather = wx_string != null ? PresentWeather.parse(wx_string!) : null;
   /// cloud information
-  late CloudStack sky_condition = CloudStack.fromElement(tafElement);
+  late CloudStack sky_condition = CloudStack.fromElement(fcstElement);
   /// base AGL of lowest significant cloud
   late double? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
   /// ambient pressure
-  late double altim_in_hg = double.parse(tafElement.getElement('altim_in_hg')?.innerText ?? "0");
+  late double altim_in_hg = double.parse(fcstElement.getElement('altim_in_hg')?.innerText ?? "0");
   /// tempertures
-  late double temp_c = double.parse(tafElement.getElement('temp_c')?.innerText ?? "0");
-  late double dewpoint_c = double.parse(tafElement.getElement('dewpoint_c')?.innerText ?? "0");
+  late double temp_c = double.parse(fcstElement.getElement('temp_c')?.innerText ?? "0");
+  late double dewpoint_c = double.parse(fcstElement.getElement('dewpoint_c')?.innerText ?? "0");
   /// internal visibility string
-  late String? _visibilityStr = tafElement.getElement('visibility_statute_mi')?.innerText;
+  late String? _visibilityStr = fcstElement.getElement('visibility_statute_mi')?.innerText;
   /// visibility status miles
   late double? visibility_statute_mi = (() {
     if (_visibilityStr != null) {
