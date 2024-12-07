@@ -59,67 +59,56 @@ class Forecast {
   final DateTime fcstTimeTo;
   final String? changeIndicator;
   final int? probability;
-  final double? windDirDegrees;
-  final double? windSpeedKt;
-  final double? windGustKt;
-  final double? visibilityStatuteMi;
-  final double? altimInHg;
-  final String? wxString;
-  final CloudStack skyConditions;
-  final List<Temperature>? temperatures;
-
-  /// Wind information in one object
-  late Wind? wind = (windGustKt != null && windSpeedKt != null && windDirDegrees != null) ?
-                    Wind(windSpeedKt!, windDirDegrees!, windGustKt!) :
-                    ((windSpeedKt != null && windDirDegrees != null) ? Wind(windSpeedKt!, windDirDegrees!) : null);
+  final XmlElement tafElement;
 
   Forecast({
     required this.fcstTimeFrom,
     required this.fcstTimeTo,
+    required this.tafElement,
     this.changeIndicator,
     this.probability,
-    this.windDirDegrees,
-    this.windSpeedKt,
-    this.windGustKt,
-    this.visibilityStatuteMi,
-    this.altimInHg,
-    this.wxString,
-    required this.skyConditions,
-    this.temperatures,
   });
 
   factory Forecast.fromXml(XmlElement xml) {
-    // scan degrees of wind
-    var degrees = xml.getElement('wind_dir_degrees')?.innerText ?? "0";
-    // decode visibility
-    var visibility_statute_mi = null;
-    var visibilityStr = xml.getElement('visibility_statute_mi')?.innerText;
-    if (visibilityStr != null) {
-      var match = RegExp(r'\d+').firstMatch(visibilityStr);
-      if (match != null && match[0] != null) {
-        visibility_statute_mi = double.parse(match[0]!);
-      }
-    }
-
     return Forecast(
       fcstTimeFrom: DateTime.parse(xml.getElement('fcst_time_from')?.innerText ?? DateTime.now().toString()),
       fcstTimeTo: DateTime.parse(xml.getElement('fcst_time_to')?.innerText ?? DateTime.now().toString()),
+      tafElement: xml,
       probability: int.tryParse(xml.getElement('probability')?.innerText ?? ''),
       changeIndicator: xml.getElement('change_indicator')?.innerText,
-      windDirDegrees: degrees == "VRB" ? 0.0 : double.parse(degrees),
-      windSpeedKt: double.tryParse(xml.getElement('wind_speed_kt')?.innerText ?? '0') ?? 0,
-      windGustKt: double.tryParse(xml.getElement('wind_gust_kt')?.innerText ?? '0') ?? 0,
-      visibilityStatuteMi: visibility_statute_mi,
-      altimInHg: double.tryParse(xml.getElement('altim_in_hg')?.innerText ?? ''),
-      wxString: xml.getElement('wx_string')?.innerText,
-      skyConditions: CloudStack.fromElement(xml),
-      temperatures: xml.findElements('temperature').map((e) => Temperature.fromXml(e)).toList(),
-    );
+
+     );
   }
-  /// horizontal visibility in status miles
-  double? get visibility => this.visibilityStatuteMi;
+
+  /// get wind parameters
+  late Wind wind = Wind.fromElement(tafElement);
+  /// weather text
+  late String? wx_string = tafElement.getElement('wx_string')?.innerText;
   /// Decoded weather or null if not reported
-  late PresentWeather? weather = wxString != null ? PresentWeather.parse(wxString!) : null;
+  late PresentWeather? weather = wx_string != null ? PresentWeather.parse(wx_string!) : null;
+  /// cloud information
+  late CloudStack sky_condition = CloudStack.fromElement(tafElement);
+  /// base AGL of lowest significant cloud
+  late double? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
+  /// ambient pressure
+  late double altim_in_hg = double.parse(tafElement.getElement('altim_in_hg')?.innerText ?? "0");
+  /// tempertures
+  late double temp_c = double.parse(tafElement.getElement('temp_c')?.innerText ?? "0");
+  late double dewpoint_c = double.parse(tafElement.getElement('dewpoint_c')?.innerText ?? "0");
+  /// internal visibility string
+  late String? _visibilityStr = tafElement.getElement('visibility_statute_mi')?.innerText;
+  /// visibility status miles
+  late double? visibility_statute_mi = (() {
+    if (_visibilityStr != null) {
+      var match = RegExp(r'\d+').firstMatch(_visibilityStr!);
+      if (match != null && match[0] != null) {
+        return double.parse(match[0]!);
+      }
+    }
+     return null;
+  })();
+  /// horizontal visibility in always in status miles
+  double? get visibility => this.visibility_statute_mi;
 }
 
 class Temperature {

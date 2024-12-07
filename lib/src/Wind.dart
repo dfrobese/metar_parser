@@ -1,4 +1,6 @@
 
+import 'package:xml/xml.dart';
+
 enum WindUnit {
   KT, MPS, KPH;
 
@@ -21,21 +23,33 @@ enum WindUnit {
 
 
 class Wind {
+  /// variable wind direction
+  final bool variable;
   /// Wind direction in degrees
-  final double direction;
+  final int direction;
   /// Wind direction min in degrees
-  final double ?dir_from;
+  final int ?dir_from;
   /// Wind direction max in degrees
-  final double ?dir_to;
+  final int ?dir_to;
   /// Wind speed in knots
-  final double speed;
+  final int speed;
   /// Wind gusts in knots
-  final double ?gust;
+  final int ?gust;
 
-  const Wind(this.direction, this.speed, [this.gust, this.dir_from , this.dir_to]);
+  /// Init wind
+  const Wind(this.variable, this.direction, this.speed, [this.gust, this.dir_from , this.dir_to]);
 
+  factory Wind.fromElement(XmlElement metarElement) {
+
+    var dirString = metarElement.getElement('wind_dir_degrees')?.innerText ?? "0";
+    var variable = dirString == "VRB";
+    var direction = variable ? 0 : int.tryParse(dirString) ?? 0;
+    var speed = int.tryParse(metarElement.getElement('wind_speed_kt')?.innerText ?? "0") ?? 0;
+    var gust = int.tryParse(metarElement.getElement('wind_gust_kt')?.innerText ?? "");
+    return Wind(variable, direction, speed, gust);
+  }
   /// Return true if gusty wind condition
   bool get isGusty => (gust != null && gust! > 0);
-  /// Return variable or not
-  bool get isVariable => direction == 0;
+
+
 }
