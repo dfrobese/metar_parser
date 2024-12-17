@@ -1,6 +1,6 @@
 
 import 'package:metar_parser_dart/metar_parser_dart.dart';
-import 'package:metar_parser_dart/src/metar_raw_parser.dart';
+import 'package:metar_parser_dart/src/raw_parser/metar_raw_parser.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 

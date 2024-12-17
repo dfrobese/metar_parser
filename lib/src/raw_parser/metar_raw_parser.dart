@@ -2,7 +2,7 @@
 import 'package:metar_parser_dart/src/PresentWeather.dart';
 import 'package:metar_parser_dart/src/Wind.dart';
 import 'package:metar_parser_dart/src/rvr.dart';
-import 'CloudCoverage.dart';
+import '../CloudCoverage.dart';
 
 enum MetarRawElement {
   typeMetar,
@@ -21,7 +21,7 @@ enum MetarRawElement {
   temperature,
   altimeter,
   changeMetar,
-  changeTaf,
+  change_indicator,
   remark,
   icingGroup,
   turbulenceGroup;
@@ -61,8 +61,8 @@ enum MetarRawElement {
         return r'((?:QNH|Q|A)\d{4})(INS|HPA)?';
       case changeMetar:
         return "(NOSIG|((BECMG|TEMPO)\\s(?:${MetarRawElement.wind.regExpString}\\s?)?(?:${MetarRawElement.visibility.regExpString}\\s?)?(?:${MetarRawElement.weather.regExpString})?(?:${MetarRawElement.clouds.regExpString})?))";
-      case changeTaf:
-        return r'(BECMG|TEMPO|(PROB\d{2}(\sTEMPO\s)?))';
+      case change_indicator:
+        return r'((PROB\d{2}|BECMG|TEMPO|FM\d{6})|(PROB\d{2}\sTEMPO))';
       case remark:
         return r'(RMK.+)';
       case icingGroup:
@@ -76,7 +76,7 @@ enum MetarRawElement {
   static const metarSequence = [typeMetar, station, published, mode, wind, windVRB, windVaries, visibility,
     rvr, weather, clouds, temperature, altimeter, changeMetar, remark];
   static const tafStartSequence = [typeTaf, mode,station, published, endurance, wind, windVRB, windVaries, visibility, weather, clouds, temperature, altimeter];
-  static const tafChangeSequence = [changeTaf, endurance, wind, windVRB, windVaries, visibility, weather, clouds, temperature, altimeter];
+  static const tafChangeSequence = [change_indicator, endurance, wind, windVRB, windVaries, visibility, weather, clouds, temperature, altimeter];
   static const tafEndSequence = [mode, remark];
 }
 
@@ -115,7 +115,7 @@ static List<Map<String, String?>> parseTafRawText(String taf) {
   result.add(parsedTafStart);
 
   // change sequence loop
-  while (RegExp(MetarRawElement.changeTaf.regExpString).firstMatch(remaining) != null) {
+  while (RegExp(MetarRawElement.change_indicator.regExpString).firstMatch(remaining) != null) {
     // change sequence
     Map<String, String?> parsedTafChange = {};
     for (var element in MetarRawElement.tafChangeSequence) {

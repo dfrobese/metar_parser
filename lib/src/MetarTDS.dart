@@ -8,7 +8,7 @@ import 'package:country/country.dart';
 import 'package:xml/xml.dart';
 import 'CloudCoverage.dart';
 import 'PresentWeather.dart';
-import 'metar_raw_parser.dart';
+import 'raw_parser/metar_raw_parser.dart';
 
 
 class MetarTDS implements TDSElement, FlightCategoryRelated {
@@ -74,8 +74,5 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
   })();
   /// horizontal visibility in always in status miles
   double? get visibility => this.visibility_statute_mi;
-
-
-
 }
 
