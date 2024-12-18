@@ -96,7 +96,7 @@ class ForecastRaw {
 
   static Map<String, String?> _parseIndicator(String text) {
     final pattern = RegExp(
-        r'(?<indicator>(TAF|PROB|BECMG|TEMPO|FM))(?<value>(\d{2,6}))?(?<tempo>(\sTEMPO))?'
+        r'(?<indicator>(TAF|PROB|BECMG|TEMPO|INTER|FM))(?<value>(\d{2,6}))?(?<tempo>(\sTEMPO))?'
     );
 
     final match = pattern.firstMatch(text);

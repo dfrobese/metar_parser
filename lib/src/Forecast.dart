@@ -4,7 +4,7 @@ import 'package:metar_parser_dart/src/Wind.dart';
 import 'package:xml/xml.dart';
 
 enum ChangeIndicator {
-  TAF, BECMG, TEMPO, PROB, FM;
+  TAF, BECMG, TEMPO, PROB, FM, INTER;
 
   /// Create object from string
   factory ChangeIndicator.parse(String str) {
