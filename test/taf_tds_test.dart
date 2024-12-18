@@ -28,7 +28,7 @@ void main () {
 
      // for all tafs
     tafs.values.forEach((element) {
-      final rawOrg = element.rawText;
+      final rawOrg = element.rawText.trim();
       final mapFromRaw = MetarTafRawParser.parseTafRawText(rawOrg);
       final tafFromRaw = TafRaw.fromMap(mapFromRaw);
       final rawRebuild = tafFromRaw.rawText;

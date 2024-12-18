@@ -16,15 +16,20 @@ enum MetarRawElement {
   windVaries,
   visibility,
   rvr,
+  weatherTaf,
   weather,
   clouds,
+  windSheer,
+  icingGroup,
+  turbulenceGroup,
   temperature,
   altimeter,
+  temperatureChange,
+  frictionState,
   changeMetar,
   change_indicator,
   remark,
-  icingGroup,
-  turbulenceGroup;
+  correctionAt;
 
   // Method to generate dynamic regex pattern for each element
   String get regExpString {
@@ -48,36 +53,47 @@ enum MetarRawElement {
       case wind:
         return '(\\d{3})(\\d{2})(G\\d{2})?(${WindUnit.regStr})?';
       case visibility:
-        return r'(?:(P?\d{1,2}|((\d\s)?\d\/\d))SM)|(?:(\d{4}([NSWE]{1,2})?)(\s\d{4}([NSWE]{1,2})?)?)';
+        return r'(?:(P?\d{1,2}|((\d\s)?\d\/\d))SM)|(?:(\d{4}))';
       case rvr:
         return "(R\\d{2}(\\w)?\\/([A-Z])?\\d{4}(V\\d{4})?(${RVRTrend.regStr})\\s)+";
       case weather:
-        return "(?:((\\+|-|\\s|VC|RE)?(${PresentWeather.descriptorRegStr})?(${PresentWeather.precipitationRegStr}){1,2}|(${PresentWeather.obscurationRegStr}|${PresentWeather.otherReStr}))\\s)+";
-      case clouds:
+        return "(?:((\\+|-|\\s|VC|RE)?(${PresentWeather.descriptorRegStr})?((${PresentWeather.precipitationRegStr}){1,2}|(${PresentWeather.obscurationRegStr})|(${PresentWeather.otherReStr}))?)\\s)+";
+      case weatherTaf:
+        return "(NSW|(${weather.regExpString}))";
+        case clouds:
         return "((${CloudCoverage.regSpecStr})|(((${CloudCoverage.regCloudStr})(\\d{3}|\\/{3})(CB|TCU)?\\s)+))";
+      case windSheer:
+        return r'(WS((\d{3}\/\d{5}KT)|CONDS))';
+      case icingGroup:
+        return r'(6\d{5})';
+      case turbulenceGroup:
+        return r'(5\d{5})';
       case temperature:
         return r'(M?\d{2})\/(M?\d{2})';
       case altimeter:
         return r'((?:QNH|Q|A)\d{4})(INS|HPA)?';
+      case temperatureChange:
+        return r'((T(X|N)?(M?\d{2})\/\d{4}Z)\s)+';
+      case frictionState:
+        return r'(FS\d{5})';
       case changeMetar:
         return "(NOSIG|((BECMG|TEMPO)\\s(?:${MetarRawElement.wind.regExpString}\\s?)?(?:${MetarRawElement.visibility.regExpString}\\s?)?(?:${MetarRawElement.weather.regExpString})?(?:${MetarRawElement.clouds.regExpString})?))";
       case change_indicator:
         return r'((PROB\d{2}|BECMG|TEMPO|FM\d{6})|(PROB\d{2}\sTEMPO))';
       case remark:
-        return r'(RMK.+)';
-      case icingGroup:
-        return r'(6\d{5})';
-      case turbulenceGroup:
-        return r'(5\d{5})';
+        return r'((RMK)?.+)';
+      case correctionAt:
+        return r'(COR\s\d{4})';
         break;
     }
     return "";
   }
   static const metarSequence = [typeMetar, station, published, mode, wind, windVRB, windVaries, visibility,
     rvr, weather, clouds, temperature, altimeter, changeMetar, remark];
-  static const tafStartSequence = [typeTaf, mode,station, published, endurance, wind, windVRB, windVaries, visibility, weather, clouds, temperature, altimeter];
-  static const tafChangeSequence = [change_indicator, endurance, wind, windVRB, windVaries, visibility, weather, clouds, temperature, altimeter];
-  static const tafEndSequence = [mode, remark];
+  static const tafSequence = [wind, windVRB, windVaries, visibility, weatherTaf, clouds, windSheer, icingGroup, turbulenceGroup, altimeter, temperatureChange];
+  static const tafStartSequence = [typeTaf, mode,station, published, endurance, ...tafSequence];
+  static const tafChangeSequence = [change_indicator, endurance, ...tafSequence];
+  static const tafEndSequence = [correctionAt, frictionState, remark];
 }
 
 

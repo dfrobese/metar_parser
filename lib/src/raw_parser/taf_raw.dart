@@ -1,4 +1,3 @@
-
 import 'package:metar_parser_dart/src/Forecast.dart';
 
 /// Taf content derived from raw text
@@ -21,7 +20,8 @@ class TafRaw  {
   factory TafRaw.fromMap(List<Map<String, String?>> data) {
     final tafData = data[0];
     final stationId = tafData['station'] ?? '';
-    final issueTimeString = tafData['published'] ?? '';
+    // published time set ore reconstructed from endurance start
+    final issueTimeString = tafData['published'] ?? "${tafData['endurance']?.substring(0,4)?? ""}00";
     final issueTime = _parseIssueTime(issueTimeString);
      final parts = data.sublist(0, data.length-1);
     final forecasts = parts.map((e) => ForecastRaw.fromMap(e));
@@ -39,7 +39,7 @@ class TafRaw  {
    /// raw taf of this part
   late String rawPart = data.entries.map((e) => "${e.value}").join(' ');
   /// raw taf string of whole taf including the forecasts
-  late String rawText = forecasts.map((e) =>e.rawPart).join(' ') + tail;
+  late String rawText = (forecasts.map((e) =>e.rawPart).join(' ') + " ${tail}").trim();
   
   static DateTime _parseIssueTime(String issueTimeString) {
     // Assuming the format is "ddhhmmZ"
@@ -50,8 +50,6 @@ class TafRaw  {
 
     return DateTime.utc(now.year, now.month, day, hour, minute);
   }
-
-
 }
 
 // Forecast as part of a TafTDS
@@ -71,18 +69,20 @@ class ForecastRaw {
   });
 
   factory ForecastRaw.fromMap(Map<String, String?> data) {
-     final endurance = data['endurance'] ?? '0000/0000';
-     final validTimes = _parseValidTimes(endurance);
-     var changeText = data['change_indicator']?? 'TAF';
-
-
-    // parse probability
+    var changeText = data['change_indicator']?? 'TAF';
+    // parse change indicator
     final map = _parseIndicator(changeText);
     // get change Indicator
-
-    final changeIndicator =  map["indicator"] != null ? ChangeIndicator.parse(map["indicator"]!) : ChangeIndicator.BECMG;
-    final probability = map["value"] != null ?  int.parse(map["value"]!) : 100;
-
+    final changeIndicator = ChangeIndicator.parse(map["indicator"]!);
+    // probability
+    final probability = (map["value"] != null && changeIndicator != ChangeIndicator.FM) ? int.parse(map["value"]!) : 100;
+    // endurance
+    var endurance = data['endurance'] ?? '0000/0000';
+    // use for FM star time and 0000
+    if  (changeIndicator == ChangeIndicator.FM) {
+      endurance = "${map["value"]?.substring(0,4)}/0000";
+    }
+    final validTimes = _parseValidTimes(endurance);
 
      return ForecastRaw(
         fcstTimeFrom: validTimes[0],
@@ -96,17 +96,19 @@ class ForecastRaw {
 
   static Map<String, String?> _parseIndicator(String text) {
     final pattern = RegExp(
-        r'(?<indicator>(PROB|BECMG|TEMPO|FM))(?<value>(\d{2,6}))?(\sTEMPO)?'
+        r'(?<indicator>(TAF|PROB|BECMG|TEMPO|FM))(?<value>(\d{2,6}))?(?<tempo>(\sTEMPO))?'
     );
 
     final match = pattern.firstMatch(text);
 
     if (match != null) {
       // Extract named groups
+      final tempo = match.namedGroup('tempo');
       final result = {
-        'indicator': match.namedGroup('indicator'), // Matches the indicator alone (e.g., PROB, BECMG, TEMPO, FM)
-        'value': match.namedGroup('value')
+        'indicator': tempo != null ? tempo : match.namedGroup('indicator'), // Matches the indicator alone (e.g., PROB, BECMG, TEMPO, FM)
+        'value': match.namedGroup('value'),
       };
+
       return result;
       // Example Output for "PROB30 TEMPO": {indicator: PROB}
     }
