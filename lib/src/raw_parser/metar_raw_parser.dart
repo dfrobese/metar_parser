@@ -101,59 +101,99 @@ enum MetarRawElement {
 
 
 class MetarTafRawParser {
-static Map<String, String?> parseMetarRawText(String metar) {
-  Map<String, String?> parsedMetar = {};
-  String remaining = metar+"\n"; // Add CR als end marker
+
+  /// Parese a raw Metar text and give back a map of items found
+  static Map<String, String?> parseMetarRawText(String metar) {
+    Map<String, String?> parsedMetar = {};
+    String remaining = metar + "\n"; // Add CR als end marker
 
 
     for (var element in MetarRawElement.metarSequence) {
       final match = RegExp(element.regExpString).firstMatch(remaining);
       if (match != null && match.start == 0) {
         parsedMetar[element.name] = match.group(0)?.trim();
-        remaining = remaining.substring(match.end).trimLeft(); // keep end marker
+        remaining =
+            remaining.substring(match.end).trimLeft(); // keep end marker
       }
     }
     // Exit if no match is found in current remaining string
     return parsedMetar;
   }
 
-static List<Map<String, String?>> parseTafRawText(String taf) {
+  /// split a raw Taf string in segments
+  static List<String> segmentTaf(String taf) {
+    // Define the regex to identify TAF change indicators
+    final regex = RegExp(MetarRawElement.change_indicator.regExpString);
 
-  String remaining = taf+"\n"; // Add CR als end marker
+    // Split the TAF into parts based on the regex
+    final parts = taf.split(regex);
+
+    // Filter out empty or whitespace-only parts
+    return parts.where((part) =>
+    part
+        .trim()
+        .isNotEmpty).toList();
+  }
+
+  /// static parse Taf start segment
+  static Map<String, String?> parseTafRaStartSegment(String taf) {
+    var remaining = taf;
+// start sequence
+    Map<String, String?> parsedTafStart = {};
+// loop over start sequence
+    for (var element in MetarRawElement.tafStartSequence) {
+      final match = RegExp(element.regExpString).firstMatch(remaining);
+      if (match != null) {
+// on match, store item and remove from input string (remaining string)
+        parsedTafStart[element.name] = match.group(0)?.trim();
+        remaining =
+            remaining.replaceRange(
+                match.start, match.end, ""); // keep end marker
+      }
+    }
+    return parsedTafStart;
+  }
+
+
+/// static parse Taf change segments
+static List<Map<String, String?>> parseTafRawChangeSegments(String taf) {
   List<Map<String, String?>> result = [];
-
-  // start sequence
-  Map<String, String?> parsedTafStart = {};
-  // loop over start sequence
-  for (var element in MetarRawElement.tafStartSequence) {
+  var remaining = taf;
+// change sequence
+  Map<String, String?> parsedTafChange = {};
+  // loop over the sequence
+  for (var element in MetarRawElement.tafChangeSequence) {
     final match = RegExp(element.regExpString).firstMatch(remaining);
-    if (match != null && match.start == 0) {
-      // on match, store item and remove from input string (remaining string)
-      parsedTafStart[element.name] = match.group(0)?.trim();
-      remaining = remaining.substring(match.end).trimLeft(); // keep end marker
+    if (match != null) {
+      parsedTafChange[element.name] = match.group(0)?.trim();
+      remaining =
+          remaining.replaceRange(match.start, match.end, "");
     }
   }
+  if (parsedTafChange.length > 0) { // if change group found, add it
+    result.add(parsedTafChange);
+  }
+  return result;
+}
+
+
+
+static List<Map<String, String?>> parseTafRawText(String taf) {
+
+  var segments = segmentTaf(taf+"\n");
+
+
+
+
+
+
   result.add(parsedTafStart);
 
   // change sequence loop. Look for change indicator to beginn
   var matchIndicator;
   while ((matchIndicator = RegExp(MetarRawElement.change_indicator.regExpString).firstMatch(remaining)) != null) {
     remaining = remaining.substring(matchIndicator.start).trimLeft();
-    // change sequence
-    Map<String, String?> parsedTafChange = {};
-    // loop over the sequence
-    for (var element in MetarRawElement.tafChangeSequence) {
-      final match = RegExp(element.regExpString).firstMatch(remaining);
-      if (match != null && match.start == 0) {
-        parsedTafChange[element.name] = match.group(0)?.trim();
-        remaining =
-            remaining.substring(match.end).trimLeft(); // keep end marker
-      }
-    }
-    if (parsedTafChange.length > 0) { // if change group found, add it
-        result.add(parsedTafChange);
-    }
-  }
+
   // End sequence
   Map<String, String?> parsedTafEnd = {};
   for (var element in MetarRawElement.tafEndSequence) {
