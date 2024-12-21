@@ -42,17 +42,17 @@ enum MetarRawElement {
       case station:
         return r'([A-Z0-9]{4})\s+';
       case published:
-        return r'(?:(\d{2}\d{2}\d{2}Z))\s+';
+        return r'(?:(\d{2}\d{2}\d{2}Z?))\s+';
       case endurance:
         return r'(\d{2}\d{2})\/(\d{2}\d{2})\s+';
       case mode:
-        return r'(COR|AUTO|NIL|CNL|AMD)\s+';
+        return r'(COR|AUTO|NIL|CNL|AMD)';
       case windVaries:
         return r'(\d{3})V(\d{3})';
       case windGusts: // directional wind with gusts
         return "((\\d{3})|VRB)(\\d{1,3})(G\\d{2})?(${WindUnit.regStr})";
       case windChange: // Taf wind change
-        return "((WND\\s)?(${MetarRawElement.windGusts.regExpString}|${MetarRawElement.windVaries.regExpString})(\\sAFT\\s\\d{4})?\\s(ROTOR\\sCONDS\\sEXIST)?)";
+        return "((WND\\s)?(${MetarRawElement.windGusts.regExpString}|${MetarRawElement.windVaries.regExpString})(\\sAFT\\s\\d{4}\\s)?(ROTOR\\sCONDS\\sEXIST)?)";
       case windsGrid:
         return r'(ALL\sWINDS\sGRID)';
       case visibility: // horizontal visibility
@@ -93,7 +93,7 @@ enum MetarRawElement {
   }
   static const metarSequence = [typeMetar, station, published, mode, windGusts, windVaries, visibility,
     rvr, weather, clouds, temperature, altimeter, changeMetar, remark];
-  static const tafSequence = [windGusts, windVaries, visibility, weatherTaf, clouds, windSheer, icingTurboGroup, altimeter, temperatureChange, cloudsChange, windChange, windsGrid];
+  static const tafSequence = [windGusts, windVaries, windSheer, visibility, weatherTaf, clouds, icingTurboGroup, altimeter, temperatureChange, cloudsChange, windChange, windsGrid];
   static const tafStartSequence = [typeTaf, mode,station, published, endurance, ...tafSequence];
   static const tafChangeSequence = [change_indicator, endurance, ...tafSequence];
   static const tafEndSequence = [correctionAt, frictionState, remark];

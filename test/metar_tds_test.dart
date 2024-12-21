@@ -18,7 +18,7 @@ void main () {
     expect(lfbm["station"], "LFBM");
     expect(lfbm["published"], "162130Z");
     expect(lfbm["mode"], "AUTO");
-    expect(lfbm["wind"], "06003KT");
+    expect(lfbm["windGusts"], "06003KT");
     expect(lfbm["clouds"], "CAVOK");
     expect(lfbm["temperature"], "07/06");
     expect(lfbm["altimeter"], "Q1020");
@@ -33,7 +33,7 @@ void main () {
     expect(lfbd["station"], "LFBD");
     expect(lfbd["published"], "162130Z");
     expect(lfbd["mode"], "AUTO");
-    expect(lfbd["wind"], "24002KT");
+    expect(lfbd["windGusts"], "24002KT");
     expect(lfbd["visibility"], "2500 0350");
     expect(lfbd["rvr"], "R23/0750D R05/0900D R29/1200U");
     expect(lfbd["weather"], "FG SHRA");
@@ -53,7 +53,7 @@ void main () {
     expect(eddv["station"], "EDDV");
     expect(eddv["published"], "151420Z");
     expect(eddv["mode"], "AUTO");
-    expect(eddv["wind"], "26005KT");
+    expect(eddv["windGusts"], "26005KT");
     expect(eddv["visibility"], "9999");
     expect(eddv["clouds"], "OVC022");
     expect(eddv["temperature"], "09/06");
@@ -72,8 +72,8 @@ void main () {
     print(map.station_id);
     print(map.raw_text);
     print(map.visibility_statute_mi);
-    // expect(map.wind.direction, map.moreWind.direction);
-   // expect(map.wind.speed, map.moreWind.speed);
+    // expect(map.windGusts.direction, map.morewindGusts.direction);
+   // expect(map.windGusts.speed, map.morewindGusts.speed);
     expect((map.flightCategory != FlightCategory.NONE), true);
     print('${map.flightCategory}');
 

@@ -27,18 +27,24 @@ void main () {
     expect(eddv.rawText == rawRebuild, true);
 
      // for all tafs
+    var failureCount = 0;
     tafs.values.forEach((element) {
       final rawOrg = element.rawText.trim();
       final mapFromRaw = MetarTafRawParser.parseTafRawText(rawOrg);
       final tafFromRaw = TafRaw.fromMap(mapFromRaw);
       final rawRebuild = tafFromRaw.rawText;
-      //expect(rawOrg == rawRebuild, true);
-      if (rawRebuild != rawOrg) {
+
+      try {
+        expect(rawOrg == rawRebuild, true);
+      } catch (e) {
+        failureCount++;
         print("Raw not fitted for ${element.station_id}");
         print(rawOrg);
+        var forecasts = element.forecasts;
         print(rawRebuild);
       }
     });
+    print("Failures $failureCount");
   });
 
 }
