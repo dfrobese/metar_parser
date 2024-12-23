@@ -5,14 +5,12 @@ class TafRaw  {
   final String stationId;
   final DateTime issueTime;
   final List<ForecastRaw> forecasts;
-  final String tail;
   final Map<String, String?> data;
 
   TafRaw({
     required this.stationId,
     required this.issueTime,
     required this.forecasts,
-    required this.tail,
     required this.data
   });
 
@@ -23,24 +21,23 @@ class TafRaw  {
     // published time set ore reconstructed from endurance start
     final issueTimeString = tafData['published'] ?? "${tafData['endurance']?.substring(0,4)?? ""}00";
     final issueTime = _parseIssueTime(issueTimeString);
-     final parts = data.sublist(0, data.length-1);
-    final forecasts = parts.map((e) => ForecastRaw.fromMap(e));
-    final tail = data[data.length-1].entries.map((e) => "${e.value}").join(' ');
+    // look for Taf appendix
+
+    final forecasts = data.map((e) => ForecastRaw.fromMap(e));
 
     return TafRaw(
         stationId: stationId,
         issueTime: issueTime,
         // Assuming bulletinTime matches issueTime
         forecasts: forecasts.toList(),
-        tail: tail,
         data: tafData
     );
    }
-   /// raw taf of this part
-  late String rawPart = data.entries.map((e) => "${e.value}").join(' ');
+   /// raw taf of this parts
+  late String rawPart = data.entries.map((e) => e.value?.trim()).join(' ');
   /// raw taf string of whole taf including the forecasts
-  late String rawText = (forecasts.map((e) =>e.rawPart).join(' ') + " ${tail}").trim();
-  
+  late String rawText = (forecasts.map((e) =>e.rawPart.trim()).join(' '));
+
   static DateTime _parseIssueTime(String issueTimeString) {
     // Assuming the format is "ddhhmmZ"
     final now = DateTime.now().toUtc();
@@ -92,7 +89,10 @@ class ForecastRaw {
         data: data
     );
   }
-  late String rawPart = data.entries.map((e) => "${e.value}").join(' ');
+  /// raw String build from parsed parts
+  late String rawPart = data.entries.where((e) => e.key != "raw").map((e) =>  e.value?.trim()).join(' ');
+  /// raw string in whole
+  String get raw => (data["raw"] ?? "").trim();
 
   static Map<String, String?> _parseIndicator(String text) {
     final pattern = RegExp(
@@ -105,7 +105,7 @@ class ForecastRaw {
       // Extract named groups
       final tempo = match.namedGroup('tempo');
       final result = {
-        'indicator': tempo != null ? tempo : match.namedGroup('indicator'), // Matches the indicator alone (e.g., PROB, BECMG, TEMPO, FM)
+        'indicator': tempo != null ? tempo.trim() : match.namedGroup('indicator'), // Matches the indicator alone (e.g., PROB, BECMG, TEMPO, FM)
         'value': match.namedGroup('value'),
       };
 
