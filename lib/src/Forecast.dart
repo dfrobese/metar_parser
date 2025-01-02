@@ -1,16 +1,19 @@
 import 'package:metar_parser_dart/src/CloudStack.dart';
 import 'package:metar_parser_dart/src/PresentWeather.dart';
 import 'package:metar_parser_dart/src/Wind.dart';
+import 'package:metar_parser_dart/src/raw_parser/forecast_raw.dart';
+import 'package:metar_parser_dart/src/raw_parser/taf_raw.dart';
 import 'package:xml/xml.dart';
 
 enum ChangeIndicator {
-  TAF, BECMG, TEMPO, PROB, FM, INTER;
+  TAF, FM, BECMG, PROB, TEMPO,  INTER;
 
   /// Create object from string
   factory ChangeIndicator.parse(String str) {
     var cl = ChangeIndicator.values.firstWhere((e) => e.name == str.toUpperCase());
     return cl;
   }
+
 }
 
 /// Forecast as part of a TafTDS
@@ -20,6 +23,7 @@ class Forecast {
   final ChangeIndicator changeIndicator;
   final int probability;
   final XmlElement fcstElement;
+  final ForecastRaw? forecastFromRaw;
 
   Forecast({
     required this.fcstTimeFrom,
@@ -27,16 +31,23 @@ class Forecast {
     required this.fcstElement,
     required this.changeIndicator,
     required this.probability,
+    required this.forecastFromRaw
   });
 
-  factory Forecast.fromXml(XmlElement xml) {
-    return Forecast(
-      fcstTimeFrom: DateTime.parse(xml.getElement('fcst_time_from')?.innerText ?? DateTime.now().toString()),
-      fcstTimeTo: DateTime.parse(xml.getElement('fcst_time_to')?.innerText ?? DateTime.now().toString()),
-      fcstElement: xml,
-      probability: int.tryParse(xml.getElement('probability')?.innerText ?? '100') ?? 100,
-      changeIndicator: ChangeIndicator.parse(xml.getElement('change_indicator')?.innerText ?? 'TAF'),
+  factory Forecast.fromXml(XmlElement xml, TafRaw rawTaf) {
+    final fcstTimeFrom = DateTime.parse(xml.getElement('fcst_time_from')?.innerText ?? DateTime.now().toString());
+    final fcstTimeTo = DateTime.parse(xml.getElement('fcst_time_to')?.innerText ?? DateTime.now().toString());
+    final probability = int.tryParse(xml.getElement('probability')?.innerText ?? '100') ?? 100;
+    final changeIndicator = ChangeIndicator.parse(xml.getElement('change_indicator')?.innerText ?? 'TAF');
+    final rawForecast = rawTaf.getBy(fcstTimeFrom, fcstTimeTo, changeIndicator);
 
+    return Forecast(
+      fcstTimeFrom: fcstTimeFrom,
+      fcstTimeTo: fcstTimeTo,
+      fcstElement: xml,
+      probability: probability,
+      changeIndicator: changeIndicator,
+      forecastFromRaw: rawForecast
     );
   }
 
@@ -49,7 +60,7 @@ class Forecast {
   /// cloud information
   late CloudStack sky_condition = CloudStack.fromElement(fcstElement);
   /// base AGL of lowest significant cloud
-  late double? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
+  late int? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
   /// ambient pressure
   late double altim_in_hg = double.parse(fcstElement.getElement('altim_in_hg')?.innerText ?? "0");
   /// tempertures

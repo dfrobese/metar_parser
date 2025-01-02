@@ -54,7 +54,7 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
   /// cloud information
   late CloudStack sky_condition = CloudStack.fromElement(metarElement);
   /// base AGL of lowest significant cloud
-  late double? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
+  late int? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
   /// precipation
   late double precip_in = double.parse(metarElement.getElement('precip_in')?.innerText ?? "0");
   /// temperatures

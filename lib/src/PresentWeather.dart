@@ -27,6 +27,7 @@ class PresentWeather {
 
   PresentWeather._(this.wxString, this.text, this.symbol);
 
+  /// parse weather from single wx string
   factory PresentWeather.parse(String wxString) {
 
     var line = wxString;

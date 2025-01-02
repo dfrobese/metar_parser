@@ -12,6 +12,7 @@ void main () {
     final tafRaw = TafRaw.fromMap(map);
     expect(eddvRawTaf == tafRaw.rawText, true);
 
+
     // Full request
     final Map<String, TafTDS> tafs = await TafController().fullRequest();
     // pick EDDV actual Taf
@@ -25,6 +26,7 @@ void main () {
     final tafFromRaw = TafRaw.fromMap(parsedMap);
     final rawRebuild = tafFromRaw.rawText;
     expect(eddv.rawText == rawRebuild, true);
+    print("${eddv.rawFormatedText}");
 
      // for all tafs
     var failureCount = 0;

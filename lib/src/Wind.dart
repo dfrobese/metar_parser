@@ -39,8 +39,8 @@ class Wind {
   /// Init wind
   const Wind(this.variable, this.direction, this.speed, [this.gust, this.dir_from , this.dir_to]);
 
+  /// wind object from TDS XML expression
   factory Wind.fromElement(XmlElement metarElement) {
-
     var dirString = metarElement.getElement('wind_dir_degrees')?.innerText ?? "0";
     var variable = dirString == "VRB";
     var direction = variable ? 0 : int.tryParse(dirString) ?? 0;

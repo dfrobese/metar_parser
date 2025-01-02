@@ -1,42 +1,37 @@
 import 'package:metar_parser_dart/src/Forecast.dart';
 
+import 'forecast_raw.dart';
+
 /// Taf content derived from raw text
-class TafRaw  {
+class TafRaw {
   final String stationId;
   final DateTime issueTime;
-  final List<ForecastRaw> forecasts;
-  final Map<String, String?> data;
+  final List<Map<String, String?>> data;
 
-  TafRaw({
-    required this.stationId,
-    required this.issueTime,
-    required this.forecasts,
-    required this.data
-  });
-
+  TafRaw(
+      {required this.stationId, required this.issueTime, required this.data});
 
   factory TafRaw.fromMap(List<Map<String, String?>> data) {
     final tafData = data[0];
     final stationId = tafData['station'] ?? '';
     // published time set ore reconstructed from endurance start
-    final issueTimeString = tafData['published'] ?? "${tafData['endurance']?.substring(0,4)?? ""}00";
+    final issueTimeString = tafData['published'] ??
+        "${tafData['endurance']?.substring(0, 4) ?? ""}00";
     final issueTime = _parseIssueTime(issueTimeString);
     // look for Taf appendix
-
-    final forecasts = data.map((e) => ForecastRaw.fromMap(e));
 
     return TafRaw(
         stationId: stationId,
         issueTime: issueTime,
         // Assuming bulletinTime matches issueTime
-        forecasts: forecasts.toList(),
-        data: tafData
-    );
-   }
-   /// raw taf of this parts
-  late String rawPart = data.entries.map((e) => e.value?.trim()).join(' ');
+        data: data);
+  }
+
+  /// raw taf of this parts
+  late String rawPart = data.map((e) => e.values.join(" ").trim()).join(' ');
+
   /// raw taf string of whole taf including the forecasts
-  late String rawText = (forecasts.map((e) =>e.rawPart.trim()).join(' '));
+  late String rawText = (forecasts.map((e) => e.rawPart.trim()).join(' '));
 
   static DateTime _parseIssueTime(String issueTimeString) {
     // Assuming the format is "ddhhmmZ"
@@ -47,86 +42,22 @@ class TafRaw  {
 
     return DateTime.utc(now.year, now.month, day, hour, minute);
   }
+
+
+  /// Sorting by fcstTimeFrom, then fcstTimeTo, then ChangeIndicator
+  late List<ForecastRaw> forecasts = List.from(data.map((e) => ForecastRaw.fromMap(e)));
+
+  ForecastRaw? getBy(DateTime from, DateTime to, ChangeIndicator change) {
+      final ForecastRaw? found = forecasts.firstWhere(
+          (forecast) =>
+      forecast.fcstTimeFrom == from &&
+          forecast.fcstTimeTo == to &&
+          forecast.changeIndicator == change,
+      orElse: null,
+    );
+      return found;
+  }
+
+
 }
 
-// Forecast as part of a TafTDS
-class ForecastRaw {
-  final DateTime fcstTimeFrom;
-  final DateTime fcstTimeTo;
-  final ChangeIndicator changeIndicator;
-  final int probability;
-  final Map<String, String?> data;
-
-  ForecastRaw({
-    required this.fcstTimeFrom,
-    required this.fcstTimeTo,
-    required this.changeIndicator,
-    required this.probability,
-    required this.data
-  });
-
-  factory ForecastRaw.fromMap(Map<String, String?> data) {
-    var changeText = data['change_indicator']?? 'TAF';
-    // parse change indicator
-    final map = _parseIndicator(changeText);
-    // get change Indicator
-    final changeIndicator = ChangeIndicator.parse(map["indicator"]!);
-    // probability
-    final probability = (map["value"] != null && changeIndicator != ChangeIndicator.FM) ? int.parse(map["value"]!) : 100;
-    // endurance
-    var endurance = data['endurance'] ?? '0000/0000';
-    // use for FM star time and 0000
-    if  (changeIndicator == ChangeIndicator.FM) {
-      endurance = "${map["value"]?.substring(0,4)}/0000";
-    }
-    final validTimes = _parseValidTimes(endurance);
-
-     return ForecastRaw(
-        fcstTimeFrom: validTimes[0],
-        fcstTimeTo: validTimes[1],
-        changeIndicator: changeIndicator,
-        probability: probability,
-        data: data
-    );
-  }
-  /// raw String build from parsed parts
-  late String rawPart = data.entries.where((e) => e.key != "raw").map((e) =>  e.value?.trim()).join(' ');
-  /// raw string in whole
-  String get raw => (data["raw"] ?? "").trim();
-
-  static Map<String, String?> _parseIndicator(String text) {
-    final pattern = RegExp(
-        r'(?<indicator>(TAF|PROB|BECMG|TEMPO|INTER|FM))(?<value>(\d{2,6}))?(?<tempo>(\sTEMPO))?'
-    );
-
-    final match = pattern.firstMatch(text);
-
-    if (match != null) {
-      // Extract named groups
-      final tempo = match.namedGroup('tempo');
-      final result = {
-        'indicator': tempo != null ? tempo.trim() : match.namedGroup('indicator'), // Matches the indicator alone (e.g., PROB, BECMG, TEMPO, FM)
-        'value': match.namedGroup('value'),
-      };
-
-      return result;
-      // Example Output for "PROB30 TEMPO": {indicator: PROB}
-    }
-    return {};
-  }
-
-  static List<DateTime> _parseValidTimes(String endurance) {
-    // Assuming the format is "ddhh/ddhh"
-    final now = DateTime.now().toUtc();
-
-    final fromDay = int.parse(endurance.substring(0, 2));
-    final fromHour = int.parse(endurance.substring(2, 4));
-    final toDay = int.parse(endurance.substring(5, 7));
-    final toHour = int.parse(endurance.substring(7, 9));
-
-    final validTimeFrom = DateTime.utc(now.year, now.month, fromDay, fromHour);
-    final validTimeTo = DateTime.utc(now.year, now.month, toDay, toHour);
-
-    return [validTimeFrom, validTimeTo];
-  }
-}

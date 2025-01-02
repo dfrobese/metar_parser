@@ -2,20 +2,31 @@
 ///
 ///
 enum CloudCoverage {
-  VV, FEW, SCT, BKN, OVC, SKC, CLR, NSC,  OVX, CAVOK, NCD;
+  VV, // Vertical visibility (obscured sky)
+  FEW, // Few clouds (1-2 oktas)
+  SCT, // Scattered clouds (3-4 oktas)
+  BKN, // Broken clouds (5-7 oktas)
+  OVC, // Overcast (8 oktas)
+  SKC, // Sky clear
+  CLR, // Clear (for automated observations)
+  NSC, // No significant clouds
+  OVX, // Overcast, indeterminate
+  CAVOK, // Ceiling and visibility okay
+  NCD; // No clouds detected
+
 
   static final List<CloudAppearance> _defaultAppearances = [
-    CloudAppearance(0.0, 1.0, ''),        // VV
-    CloudAppearance(0.0, 1 / 8, '🌤️'),    // FEW
-    CloudAppearance(0.0, 3 / 8, '🌤️'),    // SCT
-    CloudAppearance(0.0, 5 / 8, '⛅️'),     // BKN
-    CloudAppearance(0.0, 1.0, '☁️'),      // OVC
-    CloudAppearance(25000.0, 0.0, '☀️'),  // SKC
-    CloudAppearance(12000.0, 0.0, '☀️'),  // CLR
-    CloudAppearance(5000.0, 0.0, '☀️'),   // NSC
-    CloudAppearance(0.0, 1.0, ''),        // OVX
-    CloudAppearance(5000.0, 0.0, '☀️'),   // CAVOK
-    CloudAppearance(5000.0, 0.0, '☀️'),   // NCD
+    CloudAppearance(0, 1.0, ''),        // VV
+    CloudAppearance(0, 1 / 8, '🌤️'),    // FEW
+    CloudAppearance(0, 3 / 8, '🌤️'),    // SCT
+    CloudAppearance(0, 5 / 8, '⛅️'),     // BKN
+    CloudAppearance(0, 1, '☁️'),      // OVC
+    CloudAppearance(25000, 0.0, '☀️'),  // SKC
+    CloudAppearance(12000, 0.0, '☀️'),  // CLR
+    CloudAppearance(5000, 0.0, '☀️'),   // NSC
+    CloudAppearance(0, 1.0, ''),        // OVX
+    CloudAppearance(5000, 0.0, '☀️'),   // CAVOK
+    CloudAppearance(5000, 0.0, '☀️'),   // NCD
   ];
 
 
@@ -36,9 +47,9 @@ enum CloudCoverage {
   }
 
   /// get default cloudbase
-  double get defaultCloudbase {
+  int get defaultCloudbase {
     assert(this.index <= CloudCoverage._defaultAppearances.length);
-    return CloudCoverage._defaultAppearances[this.index].cloudCover;
+    return CloudCoverage._defaultAppearances[this.index].defaultCloudbase;
   }
 
   /// get associated weather symbol
@@ -50,7 +61,7 @@ enum CloudCoverage {
 
 class CloudAppearance {
   /// default cloudbase
-  final double defaultCloudbase ;
+  final int defaultCloudbase ;
   /// cloud cover
   final  double cloudCover ;
   /// weather symbol

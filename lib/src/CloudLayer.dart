@@ -11,6 +11,7 @@ import 'package:xml/xml.dart';
 
 class CloudLayer {
 
+
   CloudLayer._(this.coverage, this.baseAGL);
 
   /// Create object from XML attributes
@@ -22,13 +23,20 @@ class CloudLayer {
         layer.baseAGL = layer.coverage.defaultCloudbase;
       }
       if (attribute.name.toString() == "cloud_base_ft_agl") {
-        layer.baseAGL = double.parse(attribute.value);
+        layer.baseAGL = int.parse(attribute.value);
       }
     }
     return layer;
   }
 
+  /// create cloud layer from coverage and base in feet AGL
+  factory CloudLayer.from(CloudCoverage cover,  int base) {
+      return CloudLayer._(cover, base);
+  }
+
+
+
   CloudCoverage coverage;
   /// Base AGL inb feet
-  double baseAGL;
+  int baseAGL;
 }

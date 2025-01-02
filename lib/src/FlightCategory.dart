@@ -53,8 +53,8 @@ enum FlightCategory {
 abstract class  FlightCategoryRelated {
   /// get visibilty in status miles SM
   double? get visibility;
-  /// get lowest significant cloudbase in feet
-  double? get lowestSignificantCloudBase;
+  /// get lowest significant cloudbase in feet AGL
+  int? get lowestSignificantCloudBase;
 }
 
 

@@ -45,7 +45,28 @@ class CloudStack extends CloudList<CloudLayer> {
     return stack;
   }
 
-  double? _lowestSignificantCloudBase() {
+  /// Parses a TAF cloud string into a list of CloudLayer objects.
+  factory CloudStack.fromRaw(String tafCloudString) {
+    final RegExp cloudRegex = RegExp(r'(VV|FEW|SCT|BKN|OVC)(\d{3})');
+    final matches = cloudRegex.allMatches(tafCloudString);
+    var stack = new CloudStack();
+
+    matches.forEach((match) {
+      final coverageString = match.group(1)!; // Cloud coverage code (e.g., VV, FEW)
+      final baseAGL = int.parse(match.group(2)!) * 100; // Base altitude in feet (e.g., 030 -> 3000 ft)
+
+      // Map the coverage string to the corresponding CloudCoverage enum.
+      final coverage = CloudCoverage.values.firstWhere(
+            (e) => e.toString().split('.').last == coverageString,
+        orElse: () => throw ArgumentError('Unknown cloud coverage: $coverageString'),
+      );
+
+      stack.add(CloudLayer.from(coverage, baseAGL));
+    });
+    return stack;
+  }
+
+  int? _lowestSignificantCloudBase() {
     if (this.isEmpty) {
        return null;
     }
@@ -59,6 +80,6 @@ class CloudStack extends CloudList<CloudLayer> {
     return lowestAGL;
   }
 
-  late double? lowestSignificantCloudBase = this._lowestSignificantCloudBase();
+  late int? lowestSignificantCloudBase = this._lowestSignificantCloudBase();
 }
 
