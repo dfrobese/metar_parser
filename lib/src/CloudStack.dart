@@ -36,10 +36,18 @@ class CloudStack extends CloudList<CloudLayer> {
   /// Create object from string
   factory CloudStack.fromElement(XmlElement metarElement) {
 
-    var stack = new CloudStack();
-    var sky_condition = metarElement.findElements('sky_condition');
+    final stack = new CloudStack();
+    // check for VV
+    final vv_condition = metarElement.getElement('vert_vis_ft')?.innerText;
+    if (vv_condition != null) {
+       final layer = CloudLayer.from(CloudCoverage.VV, int.parse(vv_condition));
+       stack.add(layer);
+       return stack;
+    }
+    // All other are cloud layers
+    final sky_condition = metarElement.findElements('sky_condition');
     for (var sky in sky_condition) {
-      var layer = CloudLayer.fromElement(sky);
+      final layer = CloudLayer.fromElement(sky);
       stack.add(layer);
     }
     return stack;
@@ -47,9 +55,20 @@ class CloudStack extends CloudList<CloudLayer> {
 
   /// Parses a TAF cloud string into a list of CloudLayer objects.
   factory CloudStack.fromRaw(String tafCloudString) {
-    final RegExp cloudRegex = RegExp(r'(VV|FEW|SCT|BKN|OVC)(\d{3})');
-    final matches = cloudRegex.allMatches(tafCloudString);
     var stack = new CloudStack();
+
+    // check special weather acronym
+    final RegExp specRegex = RegExp("(${CloudCoverage.regSpecStr})");
+    final match = specRegex.firstMatch(tafCloudString);
+    if (match != null) {
+      final item = CloudCoverage.parse(match[0]!);
+       stack.add(CloudLayer.from(item, item.defaultCloudbase));
+       return stack;
+    }
+
+    // create cloud stack
+    final RegExp cloudRegex = RegExp("(${CloudCoverage.regCloudStr})(\\d{3})");
+    final matches = cloudRegex.allMatches(tafCloudString);
 
     matches.forEach((match) {
       final coverageString = match.group(1)!; // Cloud coverage code (e.g., VV, FEW)

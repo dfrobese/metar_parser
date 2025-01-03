@@ -47,15 +47,28 @@ class TafRaw {
   /// Sorting by fcstTimeFrom, then fcstTimeTo, then ChangeIndicator
   late List<ForecastRaw> forecasts = List.from(data.map((e) => ForecastRaw.fromMap(e)));
 
-  ForecastRaw? getBy(DateTime from, DateTime to, ChangeIndicator change) {
-      final ForecastRaw? found = forecasts.firstWhere(
+  ForecastRaw? getBy(ChangeIndicator change, DateTime from, DateTime to) {
+      if (change == ChangeIndicator.TAF || change == ChangeIndicator.FM || change == ChangeIndicator.BECMG) {
+         return forecasts.firstWhere( (forecast) =>
+            forecast.changeIndicator == change &&
+            forecast.fcstTimeFrom == from,
+            orElse: null,);
+      }
+      // treat TEMP and INTER like the same, a TDS bug
+      if (change == ChangeIndicator.TEMPO || change == ChangeIndicator.INTER) {
+        return forecasts.firstWhere(
+              (forecast) =>
+              (forecast.changeIndicator == ChangeIndicator.TEMPO || forecast.changeIndicator == ChangeIndicator.INTER) &&
+              forecast.fcstTimeFrom == from && forecast.fcstTimeTo == to,
+          orElse: null,);
+      }
+      // all other
+     return forecasts.firstWhere(
           (forecast) =>
+          forecast.changeIndicator == change &&
       forecast.fcstTimeFrom == from &&
-          forecast.fcstTimeTo == to &&
-          forecast.changeIndicator == change,
-      orElse: null,
-    );
-      return found;
+          forecast.fcstTimeTo == to,
+      orElse: null,);
   }
 
 

@@ -1,5 +1,6 @@
 // Forecast as part of a TafTDS
 import 'package:metar_parser_dart/src/Wind.dart';
+import 'package:metar_parser_dart/src/raw_parser/metar_raw_parser.dart';
 
 import '../CloudStack.dart';
 import '../Forecast.dart';
@@ -20,22 +21,28 @@ class ForecastRaw {
         required this.data});
 
   factory ForecastRaw.fromMap(Map<String, String?> data) {
-    var changeText = data['change_indicator'] ?? 'TAF';
+    var changeText = data[MetarRawElement.change_indicator.name] ?? 'TAF';
     // parse change indicator
     final map = _parseIndicator(changeText);
     // get change Indicator
     final changeIndicator = ChangeIndicator.parse(map["indicator"]!);
+    // From indicator
+    if (changeIndicator == ChangeIndicator.FM) {
+      final from = _parseValidFrom(map["value"]!);
+      return ForecastRaw(
+          fcstTimeFrom: from,
+          fcstTimeTo: from.add(Duration(hours: 12)), // interims setting
+          changeIndicator: changeIndicator,
+          probability: 100,
+          data: data);
+    }
+    // the rest of
     // probability
-    final probability =
-    (map["value"] != null && changeIndicator != ChangeIndicator.FM)
+    final probability = (map["value"] != null)
         ? int.parse(map["value"]!)
         : 100;
     // endurance
-    var endurance = data['endurance'] ?? '0000/0000';
-    // use for FM star time and 0000
-    if (changeIndicator == ChangeIndicator.FM) {
-      endurance = "${map["value"]?.substring(0, 4)}/0000";
-    }
+    final endurance = data[MetarRawElement.endurance.name] ?? '0000/0000';
     final validTimes = _parseValidTimes(endurance);
 
     return ForecastRaw(
@@ -47,14 +54,14 @@ class ForecastRaw {
   }
 
   /// get wind parameters
-  // Todo: late Wind wind = Wind.fromElement(fcstElement);
+  late Wind? wind = Wind.from("${data[MetarRawElement.windGusts.name]??""} ${data[MetarRawElement.windVaries.name]??""}".trim());
   /// weather text
-  late String? wx_string = data['wx_string'];
+  late List<String>? _wx_list = (data[MetarRawElement.weatherTaf.name]??"").split(" ");
   /// Decoded weather or null if not reported
-  late PresentWeather? weather = wx_string != null ? PresentWeather.parse(wx_string!) : null;
+  late List<PresentWeather>? weather = _wx_list != null ? _wx_list!.map((e) =>  PresentWeather.parse(e)).toList() : null;
 
   /// cloud information
-  late CloudStack sky_condition = CloudStack.fromRaw(data['clouds']??"");
+  late CloudStack sky_condition = CloudStack.fromRaw(data[MetarRawElement.clouds.name]??"");
   /// base AGL of lowest significant cloud
   late int? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
 
@@ -102,5 +109,20 @@ class ForecastRaw {
     final validTimeTo = DateTime.utc(now.year, now.month, toDay, toHour);
 
     return [validTimeFrom, validTimeTo];
+  }
+
+  static DateTime _parseValidFrom(String time) {
+    // Assuming the format is "ddhhmm"
+    final now = DateTime.now().toUtc();
+
+    final fromDay = int.parse(time.substring(0, 2));
+    final fromHour = int.parse(time.substring(2, 4));
+    final fromMin = int.parse(time.substring(4, 6));
+
+
+    final validTimeFrom = DateTime.utc(now.year, now.month, fromDay, fromHour, fromMin);
+
+
+    return validTimeFrom;
   }
 }

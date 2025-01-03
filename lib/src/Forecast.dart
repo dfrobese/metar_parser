@@ -6,7 +6,7 @@ import 'package:metar_parser_dart/src/raw_parser/taf_raw.dart';
 import 'package:xml/xml.dart';
 
 enum ChangeIndicator {
-  TAF, FM, BECMG, PROB, TEMPO,  INTER;
+  TAF, FM, BECMG, PROB, TEMPO, INTER;
 
   /// Create object from string
   factory ChangeIndicator.parse(String str) {
@@ -39,7 +39,7 @@ class Forecast {
     final fcstTimeTo = DateTime.parse(xml.getElement('fcst_time_to')?.innerText ?? DateTime.now().toString());
     final probability = int.tryParse(xml.getElement('probability')?.innerText ?? '100') ?? 100;
     final changeIndicator = ChangeIndicator.parse(xml.getElement('change_indicator')?.innerText ?? 'TAF');
-    final rawForecast = rawTaf.getBy(fcstTimeFrom, fcstTimeTo, changeIndicator);
+    final rawForecast = rawTaf.getBy(changeIndicator, fcstTimeFrom, fcstTimeTo);
 
     return Forecast(
       fcstTimeFrom: fcstTimeFrom,

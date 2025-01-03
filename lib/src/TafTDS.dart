@@ -72,11 +72,12 @@ class TafTDS implements TDSElement{
     tafTDS.sort((a, b) {
       int result = a.fcstTimeFrom.compareTo(b.fcstTimeFrom);
       if (result == 0) {
-        result = -(a.fcstTimeTo.compareTo(b.fcstTimeTo));
-      }
-      if (result == 0) {
         result = a.changeIndicator.index.compareTo(b.changeIndicator.index);
       }
+      if (result == 0) {
+        result = -(a.fcstTimeTo.compareTo(b.fcstTimeTo));
+      }
+
       return result;
     });
     return tafTDS;

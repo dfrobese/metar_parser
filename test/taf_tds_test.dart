@@ -11,6 +11,11 @@ void main () {
     final map = MetarTafRawParser.parseTafRawText(eddvRawTaf);
     final tafRaw = TafRaw.fromMap(map);
     expect(eddvRawTaf == tafRaw.rawText, true);
+    expect (tafRaw.forecasts[0].lowestSignificantCloudBase == 2000, true);
+    expect (tafRaw.forecasts[1].lowestSignificantCloudBase == 800, true);
+    expect (tafRaw.forecasts[2].lowestSignificantCloudBase == 1200, true);
+    expect (tafRaw.forecasts[2].weather?.first.wxString == '-SHSNRA', true);
+    print (tafRaw.forecasts[2].weather?.first.toString());
 
 
     // Full request
@@ -37,6 +42,7 @@ void main () {
       final tafFromRaw = TafRaw.fromMap(mapFromRaw);
       final rawRebuild = tafFromRaw.rawText;
 
+      expect (tafFromRaw.forecasts.first.lowestSignificantCloudBase == element.forecasts.first.lowestSignificantCloudBase, true);
       try {
         expect(rawOrg == rawRebuild, true);
       } catch (e) {
@@ -44,6 +50,7 @@ void main () {
         print("Raw not fitted for ${element.station_id}");
         print(rawOrg);
         var forecasts = element.forecasts;
+
         print(rawRebuild);
       }
     });

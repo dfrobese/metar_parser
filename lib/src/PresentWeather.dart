@@ -10,13 +10,17 @@ class PresentWeather {
   static final symbols= {"DZ": "🌦", "RA": "🌧", "SN": "🌨", "SG": "❄️", "IC": "❄️", "PL": "❄️", "GR": "❄️ hail", "GS": "❄️", "UP": "?", "VA": "🌋", "FC": "🌪",  "TS": "🌩", "FZ": "❄️", "BR": " 💨"};
 
 
+
   static final String intensityRegStr = {"-", "\\+", "VC", "RE"}.join("|");
   static final String descriptorRegStr =  PresentWeather.descriptor.keys.join("|") ;
   static final String precipitationRegStr =  PresentWeather.precipitation.keys.join("|") ;
   static final String obscurationRegStr =  PresentWeather.obscuration.keys.join("|");
   static final String otherReStr = PresentWeather.other.keys.join("|");
 
-  static final pattern = [[intensityRegStr, intensity], [descriptorRegStr, descriptor], [precipitationRegStr, precipitation], [obscurationRegStr, obscuration], [otherReStr, other]];
+  static final pattern = [intensityRegStr, descriptorRegStr, precipitationRegStr, obscurationRegStr, otherReStr].join("|");
+  static final all = {...intensity, ...descriptor,  ...precipitation, ...obscuration , ...other};
+
+  // static final pattern = [[intensityRegStr, intensity], [descriptorRegStr, descriptor], [precipitationRegStr, precipitation], [obscurationRegStr, obscuration], [otherReStr, other]];
 
   /// weather string coded
   String wxString;
@@ -34,20 +38,19 @@ class PresentWeather {
     StringBuffer text = StringBuffer();
     StringBuffer symbol = StringBuffer();
 
-    pattern.forEach((pair) {
-      // regex string
-      var rx = RegExp(pair[0] as String);
-      var matches = rx.allMatches(line);
-      matches.forEach((element) {
-        var found = element[0];
-        line = line.substring(element.end);
-        // map found acronym to plain text
-        text.write(((pair[1] as Map<String, String>)[found] ?? "") + " ");
-        symbol.write(symbols[found] ?? "");
-      });
-    });
+    final rx = RegExp(PresentWeather.pattern);
 
-    return PresentWeather._(line, text.toString().trim(), symbol.toString());
+    while (line.length > 0) {
+      final match = rx.firstMatch(line);
+      if (match != null && match.start == 0) {
+        final item = match[0]!.trim();
+        // map found acronym to plain text
+        text.write(all[item]! + " ");
+        symbol.write(symbols[item] ?? "");
+        line = line.substring(match.end);
+      }
+    }
+    return PresentWeather._(wxString, text.toString().trim(), symbol.toString());
    }
 
 
