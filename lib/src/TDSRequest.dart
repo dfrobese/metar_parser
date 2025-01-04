@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'package:http/http.dart';
 import 'package:archive/archive_io.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
@@ -81,7 +82,9 @@ class TDSRequest {
       Response response = await get(Uri.parse(link));
       return response.body;
     } on Exception catch(e) {
-      return "Read file from url $link failed";
+      final msg = "Read file from url $link failed";
+      developer.log('ERROR $msg');
+      return msg;
     }
   }
 

@@ -1,12 +1,12 @@
 
 import 'dart:developer' as developer;
-import 'package:metar_parser_dart/src/CloudStack.dart';
-import 'package:metar_parser_dart/src/FlightCategory.dart';
+import 'package:metar_parser_dart/src/cloud_stack.dart';
+import 'package:metar_parser_dart/src/flight_category.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
-import 'package:metar_parser_dart/src/Wind.dart';
+import 'package:metar_parser_dart/src/wind.dart';
 import 'package:country/country.dart';
 import 'package:xml/xml.dart';
-import 'CloudCoverage.dart';
+import 'cloud_coverage.dart';
 import 'PresentWeather.dart';
 import 'raw_parser/metar_raw_parser.dart';
 

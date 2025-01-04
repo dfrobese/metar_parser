@@ -1,5 +1,5 @@
 
-import 'package:metar_parser_dart/src/CloudCoverage.dart';
+import 'package:metar_parser_dart/src/cloud_coverage.dart';
 import 'package:xml/xml.dart';
 
 

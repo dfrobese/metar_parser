@@ -1,40 +1,6 @@
 
+import 'package:metar_parser_dart/src/units/velocity_unit.dart';
 import 'package:xml/xml.dart';
-
-enum WindUnit {
-  KT, MPS, KPH;
-
-  static final List<String> unitStr = ["kt", "m/s", "km/h"];
-
-  // Wind regexp
-  static  final String regStr = WindUnit.values.map((e){return e.name;}).join("|");
-
-  /// Create object from string
-  factory WindUnit.parse(String str) {
-    var cl = WindUnit.values.firstWhere((e) => e.name == str.toUpperCase(), orElse: () => WindUnit.KT);
-    return cl;
-  }
-
-  String get unit {
-     assert(this.index <= WindUnit.unitStr.length);
-     return WindUnit.unitStr[this.index];
-  }
-
-  // Converts speed to knots based on the unit.
-  int convertToKnots(int speed) {
-    switch (this) {
-      case KT: // Knots
-        return speed;
-      case MPS: // Meters per second
-        return (speed * 1.94384).round();
-      case KPH: // Kilometers per hour
-        return (speed * 0.539957).round();
-      default:
-        throw ArgumentError('Unknown unit: $unit');
-    }
-  }
-}
-
 
 class Wind {
   /// variable wind direction
@@ -65,7 +31,7 @@ class Wind {
 
   /// wind from raw
   /// Parses a TAF wind string into a Wind object.
-  factory Wind.from(String tafWindString) {
+  factory Wind.parse(String tafWindString) {
     final RegExp windRegex = RegExp(
     r'(?<variable>VRB)|(?<direction>\d{3})(?<speed>P?\d{2})(?:G(?<gust>P?\d{2}))?(?<unit>KT|MPS|KPH)(?: (?<dir_from>\d{3})V(?<dir_to>\d{3}))?',
     );
@@ -95,7 +61,7 @@ class Wind {
         : null;
 
     // Convert speed and gust to knots
-    final unit = WindUnit.parse(unitStr);
+    final unit = VelocityUnit.parse(unitStr);
     final speedKnots = unit.convertToKnots(speed);
     final gustKnots = gust != null ? unit.convertToKnots(gust) : null;
 

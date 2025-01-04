@@ -1,6 +1,6 @@
 import 'dart:collection';
-import 'package:metar_parser_dart/src/CloudCoverage.dart';
-import 'package:metar_parser_dart/src/CloudLayer.dart';
+import 'package:metar_parser_dart/src/cloud_coverage.dart';
+import 'package:metar_parser_dart/src/cloud_layer.dart';
 import 'package:xml/xml.dart';
 
 

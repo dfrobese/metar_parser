@@ -1,5 +1,5 @@
-import 'package:metar_parser_dart/src/Forecast.dart';
-
+import 'package:metar_parser_dart/src/forecast.dart';
+import 'dart:developer' as developer;
 import 'forecast_raw.dart';
 
 /// Taf content derived from raw text
@@ -43,34 +43,36 @@ class TafRaw {
     return DateTime.utc(now.year, now.month, day, hour, minute);
   }
 
-
   /// Sorting by fcstTimeFrom, then fcstTimeTo, then ChangeIndicator
   late List<ForecastRaw> forecasts = List.from(data.map((e) => ForecastRaw.fromMap(e)));
 
   ForecastRaw? getBy(ChangeIndicator change, DateTime from, DateTime to) {
-      if (change == ChangeIndicator.TAF || change == ChangeIndicator.FM || change == ChangeIndicator.BECMG) {
-         return forecasts.firstWhere( (forecast) =>
-            forecast.changeIndicator == change &&
-            forecast.fcstTimeFrom == from,
-            orElse: null,);
-      }
-      // treat TEMP and INTER like the same, a TDS bug
-      if (change == ChangeIndicator.TEMPO || change == ChangeIndicator.INTER) {
+      try {
+        if (change == ChangeIndicator.TAF || change == ChangeIndicator.FM || change == ChangeIndicator.BECMG) {
+                 return forecasts.firstWhere( (forecast) =>
+                    forecast.changeIndicator == change &&
+                    forecast.fcstTimeFrom == from,
+                    orElse: null,);
+              }
+        // treat TEMP and INTER like the same, a TDS bug
+        if (change == ChangeIndicator.TEMPO || change == ChangeIndicator.INTER) {
+                return forecasts.firstWhere(
+                      (forecast) =>
+                      (forecast.changeIndicator == ChangeIndicator.TEMPO || forecast.changeIndicator == ChangeIndicator.INTER) &&
+                      forecast.fcstTimeFrom == from && forecast.fcstTimeTo == to,
+                  orElse: null,);
+              }
+        // all other
         return forecasts.firstWhere(
-              (forecast) =>
-              (forecast.changeIndicator == ChangeIndicator.TEMPO || forecast.changeIndicator == ChangeIndicator.INTER) &&
-              forecast.fcstTimeFrom == from && forecast.fcstTimeTo == to,
-          orElse: null,);
+                  (forecast) =>
+                  forecast.changeIndicator == change &&
+              forecast.fcstTimeFrom == from &&
+                  forecast.fcstTimeTo == to,
+              orElse: null,);
+      } catch (e) {
+        developer.log("ERROR: no corresponding TAF part found $change $from $to");
+        return null;
       }
-      // all other
-     return forecasts.firstWhere(
-          (forecast) =>
-          forecast.changeIndicator == change &&
-      forecast.fcstTimeFrom == from &&
-          forecast.fcstTimeTo == to,
-      orElse: null,);
   }
-
-
 }
 

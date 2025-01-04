@@ -1,9 +1,10 @@
 // Forecast as part of a TafTDS
-import 'package:metar_parser_dart/src/Wind.dart';
+import 'package:metar_parser_dart/src/visibility.dart';
+import 'package:metar_parser_dart/src/wind.dart';
 import 'package:metar_parser_dart/src/raw_parser/metar_raw_parser.dart';
 
-import '../CloudStack.dart';
-import '../Forecast.dart';
+import '../cloud_stack.dart';
+import '../forecast.dart';
 import '../PresentWeather.dart';
 
 class ForecastRaw {
@@ -54,17 +55,17 @@ class ForecastRaw {
   }
 
   /// get wind parameters
-  late Wind? wind = Wind.from("${data[MetarRawElement.windGusts.name]??""} ${data[MetarRawElement.windVaries.name]??""}".trim());
+  late Wind? wind = Wind.parse("${data[MetarRawElement.windGusts.name]??""} ${data[MetarRawElement.windVaries.name]??""}".trim());
   /// weather text
   late List<String>? _wx_list = (data[MetarRawElement.weatherTaf.name]??"").split(" ");
   /// Decoded weather or null if not reported
   late List<PresentWeather>? weather = _wx_list != null ? _wx_list!.map((e) =>  PresentWeather.parse(e)).toList() : null;
-
   /// cloud information
   late CloudStack sky_condition = CloudStack.fromRaw(data[MetarRawElement.clouds.name]??"");
-  /// base AGL of lowest significant cloud
+  /// base AGL of lowest significant cloud in feet
   late int? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
-
+  /// Horizontal isibility
+  late Visibility ?visibility = data[MetarRawElement.visibility.name] != null ? Visibility.parse(data[MetarRawElement.visibility.name]!) : null;
   /// raw String build from parsed parts
   late String rawPart = data.entries
       .where((e) => e.key != "raw")
@@ -74,11 +75,11 @@ class ForecastRaw {
   /// raw string in whole
   String get raw => (data["raw"] ?? "").trim();
 
+  /// parse for change indicator TAF|PROB|BECMG|TEMPO|INTER|FM
   static Map<String, String?> _parseIndicator(String text) {
     final pattern = RegExp(
         r'(?<indicator>(TAF|PROB|BECMG|TEMPO|INTER|FM))(?<value>(\d{2,6}))?(?<tempo>(\sTEMPO))?');
-
-    final match = pattern.firstMatch(text);
+    final match = pattern  .firstMatch(text);
 
     if (match != null) {
       // Extract named groups

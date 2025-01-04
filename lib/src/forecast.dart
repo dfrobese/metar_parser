@@ -1,6 +1,8 @@
-import 'package:metar_parser_dart/src/CloudStack.dart';
+import 'package:metar_parser_dart/src/cloud_stack.dart';
 import 'package:metar_parser_dart/src/PresentWeather.dart';
-import 'package:metar_parser_dart/src/Wind.dart';
+import 'package:metar_parser_dart/src/units/distance_unit.dart';
+import 'package:metar_parser_dart/src/visibility.dart';
+import 'package:metar_parser_dart/src/wind.dart';
 import 'package:metar_parser_dart/src/raw_parser/forecast_raw.dart';
 import 'package:metar_parser_dart/src/raw_parser/taf_raw.dart';
 import 'package:xml/xml.dart';
@@ -69,15 +71,15 @@ class Forecast {
   /// internal visibility string
   late String? _visibilityStr = fcstElement.getElement('visibility_statute_mi')?.innerText;
   /// visibility status miles
-  late double? visibility_statute_mi = (() {
+  late Visibility? visibility = (() {
     if (_visibilityStr != null) {
-      var match = RegExp(r'\d+').firstMatch(_visibilityStr!);
-      if (match != null && match[0] != null) {
-        return double.parse(match[0]!);
+      var match = RegExp( r'(?<miles>\d{1,2}(\.\d{1,2})?)(?<greater>\+)?' ).firstMatch(_visibilityStr!);
+      if (match != null && match.namedGroup('miles') != null) {
+        final value = double.parse(match.namedGroup('miles')!);
+        final greater = match.namedGroup('greater') != null;
+        return Visibility(value, DistanceUnit.SM, greater);
       }
     }
     return null;
   })();
-  /// horizontal visibility in always in status miles
-  double? get visibility => this.visibility_statute_mi;
 }

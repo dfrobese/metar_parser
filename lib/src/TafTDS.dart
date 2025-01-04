@@ -1,9 +1,9 @@
 import 'dart:developer' as developer;
 import 'package:country/country.dart';
-import 'package:metar_parser_dart/src/Forecast.dart';
-import 'package:metar_parser_dart/src/Wind.dart';
+import 'package:metar_parser_dart/src/forecast.dart';
+import 'package:metar_parser_dart/src/wind.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
-import 'package:metar_parser_dart/src/CloudStack.dart';
+import 'package:metar_parser_dart/src/cloud_stack.dart';
 import 'package:metar_parser_dart/src/raw_parser/metar_raw_parser.dart';
 import 'package:metar_parser_dart/src/raw_parser/taf_raw.dart';
 import 'package:xml/xml.dart';
@@ -70,6 +70,9 @@ class TafTDS implements TDSElement{
     final tafTDS = tafElement.findElements('forecast').map((e) => Forecast.fromXml(e, _tafFromRaw)).toList();
     // sort by time and changeindicator
     tafTDS.sort((a, b) {
+      if (a.changeIndicator == ChangeIndicator.TAF) {
+        return -1;
+      }
       int result = a.fcstTimeFrom.compareTo(b.fcstTimeFrom);
       if (result == 0) {
         result = a.changeIndicator.index.compareTo(b.changeIndicator.index);

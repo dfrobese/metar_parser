@@ -1,7 +1,10 @@
 import 'package:metar_parser_dart/src/PresentWeather.dart';
-import 'package:metar_parser_dart/src/Wind.dart';
+import 'package:metar_parser_dart/src/wind.dart';
 import 'package:metar_parser_dart/src/rvr.dart';
-import '../CloudCoverage.dart';
+import '../cloud_coverage.dart';
+import 'dart:developer' as developer;
+
+import '../units/velocity_unit.dart';
 
 enum MetarRawElement {
   typeMetar,
@@ -49,7 +52,7 @@ enum MetarRawElement {
       case windVaries:
         return r'(\d{3})V(\d{3})';
       case windGusts: // directional wind with gusts
-        return "((\\d{3})|VRB)(\\d{1,3})(G\\d{2})?(${WindUnit.regStr})";
+        return "((\\d{3})|VRB)(\\d{1,3})(G\\d{2})?(${VelocityUnit.regStr})";
       case windChange: // Taf wind change
         return "((WND\\s)?(${MetarRawElement.windGusts.regExpString}|${MetarRawElement.windVaries.regExpString})(\\sAFT\\s\\d{4}\\s)?(ROTOR\\sCONDS\\sEXIST)?)";
       case windsGrid:
@@ -193,13 +196,13 @@ class MetarTafRawParser {
     remaining = remaining.trim();
     // store unknown part
     if (parsedTafStart.length > 0) {
+      developer.log("Taf parsing remains with: $remaining");
       parsedTafStart["remaining"] = remaining;
     }
-
     return parsedTafStart;
   }
 
-  /// static parse Taf change segments
+  ///  Parse raw Taf string to decode the given change segment
   static Map<String, String?> _parseTafRawChangeSegment(String taf) {
     var remaining = taf + " "; // Add CR als end marker;
 // change sequence
@@ -217,17 +220,18 @@ class MetarTafRawParser {
     }
     remaining = remaining.trim();
     if (remaining.length > 0) {
+      developer.log("Forecast parsing remains with: $remaining");
       parsedTafChange["remaining"] = remaining;
     }
     return parsedTafChange;
   }
 
-
+  /// Parse raw Taf string and returns a list of maps with key/value of each forecast part
   static List<Map<String, String?>> parseTafRawText(String taf) {
     List<Map<String, String?>> result = [];
-
+    // Split the whole Taf in segments of each change (forecast)
     var segments = _segmentTaf(taf.startsWith("TAF ") ? "$taf " : "TAF $taf ");
-
+    // parse each segment of change (forecast) found
     for (var segment in segments) {
       if (segment.startsWith("TAF")) {
         result.add(_parseTafRawStartSegment(segment));
@@ -235,7 +239,6 @@ class MetarTafRawParser {
         result.add(_parseTafRawChangeSegment(segment));
       }
     }
-
     return result;
   }
 }
