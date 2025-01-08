@@ -32,7 +32,7 @@ class StationTDS implements TDSElement {
     String state;
     String country;
     /// GPS coordinates of station
-    late Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
+    late final Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
 
 
 }

@@ -3,11 +3,12 @@ import 'package:metar_parser_dart/src/visibility.dart';
 import 'package:metar_parser_dart/src/wind.dart';
 import 'package:metar_parser_dart/src/raw_parser/metar_raw_parser.dart';
 
+import '../../metar_parser_dart.dart';
 import '../cloud_stack.dart';
-import '../forecast.dart';
-import '../PresentWeather.dart';
+import '../tds_parser/forecast_tds.dart';
+import '../present_weather.dart';
 
-class ForecastRaw {
+class ForecastRaw implements FlightCategoryRelated {
   final DateTime fcstTimeFrom;
   final DateTime fcstTimeTo;
   final ChangeIndicator changeIndicator;
@@ -55,19 +56,17 @@ class ForecastRaw {
   }
 
   /// get wind parameters
-  late Wind? wind = Wind.parse("${data[MetarRawElement.windGusts.name]??""} ${data[MetarRawElement.windVaries.name]??""}".trim());
+  late final Wind? wind = Wind.parse("${data[MetarRawElement.windGusts.name]??""} ${data[MetarRawElement.windVaries.name]??""}".trim());
   /// weather text
-  late List<String>? _wx_list = (data[MetarRawElement.weatherTaf.name]??"").split(" ");
+  late final List<String>? _wx_list = (data[MetarRawElement.weatherTaf.name]??"").split(" ");
   /// Decoded weather or null if not reported
-  late List<PresentWeather>? weather = _wx_list != null ? _wx_list!.map((e) =>  PresentWeather.parse(e)).toList() : null;
+  late final List<PresentWeather>? weather = _wx_list != null ? _wx_list!.map((e) =>  PresentWeather.parse(e)).toList() : null;
   /// cloud information
-  late CloudStack sky_condition = CloudStack.fromRaw(data[MetarRawElement.clouds.name]??"");
-  /// base AGL of lowest significant cloud in feet
-  late int? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
-  /// Horizontal isibility
-  late Visibility ?visibility = data[MetarRawElement.visibility.name] != null ? Visibility.parse(data[MetarRawElement.visibility.name]!) : null;
-  /// raw String build from parsed parts
-  late String rawPart = data.entries
+  late final CloudStack sky_condition = CloudStack.fromRaw(data[MetarRawElement.clouds.name]??"");
+  /// Horizontal visibility
+  late final Visibility ?visibility = data[MetarRawElement.visibility.name] != null ? Visibility.parse(data[MetarRawElement.visibility.name]!) : null;
+   /// raw String build from parsed parts
+  late final String rawPart = data.entries
       .where((e) => e.key != "raw")
       .map((e) => e.value?.trim())
       .join(' ');
@@ -126,4 +125,11 @@ class ForecastRaw {
 
     return validTimeFrom;
   }
+  /// Flightcategory related
+  /// base AGL of lowest significant cloud in feet
+  late final int? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
+  /// lowest visibility in miles
+  late final double? lowestVisibility = visibility?.minInMiles;
+
+  late FlightCategory flightCategory = FlightCategory.NONE;
 }

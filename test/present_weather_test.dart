@@ -1,4 +1,4 @@
-import 'package:metar_parser_dart/src/PresentWeather.dart';
+import 'package:metar_parser_dart/src/present_weather.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 

@@ -1,18 +1,16 @@
 import 'dart:developer' as developer;
 import 'package:country/country.dart';
-import 'package:metar_parser_dart/src/forecast.dart';
-import 'package:metar_parser_dart/src/wind.dart';
+import 'package:metar_parser_dart/src/tds_parser/forecast_tds.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
-import 'package:metar_parser_dart/src/cloud_stack.dart';
 import 'package:metar_parser_dart/src/raw_parser/metar_raw_parser.dart';
 import 'package:metar_parser_dart/src/raw_parser/taf_raw.dart';
 import 'package:xml/xml.dart';
 
-import 'PresentWeather.dart';
+import '../present_weather.dart';
 
 
 /// Taf content derived from NOAA text data server
-class TafTDS implements TDSElement{
+class TafTDS implements TDSElement {
   final String rawText;
   final String stationId;
   final DateTime issueTime;
@@ -49,25 +47,23 @@ class TafTDS implements TDSElement{
     );
   }
 
-
-
   /// Station ID ICAO 4 letter
   @override String get station_id => stationId;
-  late double elevationM = double.parse(tafElement.getElement('elevation_m')?.innerText ?? '0');
+  late final double elevationM = double.parse(tafElement.getElement('elevation_m')?.innerText ?? '0');
   /// list of forecasts sorted by time
-  late List<Forecast>forecasts = _buildForecasts();
+  late final List<ForecastTDS>forecasts = _buildForecasts();
   /// taf objects parsed from raw text
-  late TafRaw _tafFromRaw = ((){
+  late final TafRaw _tafFromRaw = ((){
      final mapFromRaw = MetarTafRawParser.parseTafRawText(rawText);
      return TafRaw.fromMap(mapFromRaw);
    })();
   /// GPS coordinates of station
-  late Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
+  late final Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
 
   /// Build forcecast from TDS and find the matching raw segment
-  List<Forecast> _buildForecasts() {
+  List<ForecastTDS> _buildForecasts() {
     // create Taf from raw
-    final tafTDS = tafElement.findElements('forecast').map((e) => Forecast.fromXml(e, _tafFromRaw)).toList();
+    final tafTDS = tafElement.findElements('forecast').map((e) => ForecastTDS.fromXml(e, _tafFromRaw)).toList();
     // sort by time and changeindicator
     tafTDS.sort((a, b) {
       if (a.changeIndicator == ChangeIndicator.TAF) {
@@ -85,28 +81,8 @@ class TafTDS implements TDSElement{
     });
     return tafTDS;
   }
-
-
-  late String rawFormatedText = forecasts.map((e) => e.forecastFromRaw?.rawPart).join("\n");
+  /// formated text
+  late final String rawFormatedText = forecasts.map((e) => e.forecastFromRaw?.rawPart).join("\n");
 }
 
 
-class Temperature {
-  final DateTime validTime;
-  final int? maxTempC;
-  final int? minTempC;
-
-  Temperature({
-    required this.validTime,
-    this.maxTempC,
-    this.minTempC,
-  });
-
-  factory Temperature.fromXml(XmlElement xml) {
-    return Temperature(
-      validTime: DateTime.parse(xml.getElement('valid_time')?.innerText ?? ''),
-      maxTempC: int.tryParse(xml.getElement('max_temp_c')?.innerText ?? ''),
-      minTempC: int.tryParse(xml.getElement('min_temp_c')?.innerText ?? ''),
-    );
-  }
-}

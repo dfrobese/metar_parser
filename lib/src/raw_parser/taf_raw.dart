@@ -1,4 +1,4 @@
-import 'package:metar_parser_dart/src/forecast.dart';
+import 'package:metar_parser_dart/src/tds_parser/forecast_tds.dart';
 import 'dart:developer' as developer;
 import 'forecast_raw.dart';
 
@@ -28,7 +28,7 @@ class TafRaw {
   }
 
   /// raw taf of this parts
-  late String rawPart = data.map((e) => e.values.join(" ").trim()).join(' ');
+  late final String rawPart = data.map((e) => e.values.join(" ").trim()).join(' ');
 
   /// raw taf string of whole taf including the forecasts
   late String rawText = (forecasts.map((e) => e.rawPart.trim()).join(' '));

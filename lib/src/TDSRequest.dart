@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:http/http.dart';
 import 'package:archive/archive_io.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
-import 'package:metar_parser_dart/src/StationTDS.dart';
+import 'package:metar_parser_dart/src/tds_parser/station_tds.dart';
 import 'package:xml/xml.dart';
 
 

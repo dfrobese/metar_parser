@@ -99,6 +99,6 @@ class CloudStack extends CloudList<CloudLayer> {
     return lowestAGL;
   }
 
-  late int? lowestSignificantCloudBase = this._lowestSignificantCloudBase();
+  late final int? lowestSignificantCloudBase = this._lowestSignificantCloudBase();
 }
 

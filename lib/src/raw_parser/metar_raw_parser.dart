@@ -1,4 +1,4 @@
-import 'package:metar_parser_dart/src/PresentWeather.dart';
+import 'package:metar_parser_dart/src/present_weather.dart';
 import 'package:metar_parser_dart/src/wind.dart';
 import 'package:metar_parser_dart/src/rvr.dart';
 import '../cloud_coverage.dart';

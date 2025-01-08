@@ -6,9 +6,9 @@ import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:metar_parser_dart/src/wind.dart';
 import 'package:country/country.dart';
 import 'package:xml/xml.dart';
-import 'cloud_coverage.dart';
-import 'PresentWeather.dart';
-import 'raw_parser/metar_raw_parser.dart';
+import '../cloud_coverage.dart';
+import '../present_weather.dart';
+import '../raw_parser/metar_raw_parser.dart';
 
 
 class MetarTDS implements TDSElement, FlightCategoryRelated {
@@ -31,39 +31,33 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
     return MetarTDS._(raw, id, time, latitude, longitude, metarElement);
   }
 
-
-
   /// GPS coordinates of station
-  late Coordinate coordinate = Coordinate(latitude: latitude, longitude: longitude);
+  late final Coordinate coordinate = Coordinate(latitude: latitude, longitude: longitude);
   /// elevation of station
-  late double elevation_m = double.parse(metarElement.getElement('elevation_m')?.innerText ?? "0");
+  late final double elevation_m = double.parse(metarElement.getElement('elevation_m')?.innerText ?? "0");
   /// parsed raw text information
-  late Map<String, String?> parsedRawText = MetarTafRawParser.parseMetarRawText(raw_text);
+  late final Map<String, String?> parsedRawText = MetarTafRawParser.parseMetarRawText(raw_text);
   /// get wind parameters
-  late Wind wind = Wind.fromElement(metarElement);
+  late final Wind wind = Wind.fromElement(metarElement);
   /// ambient pressure
-  late double altim_in_hg = double.parse(metarElement.getElement('altim_in_hg')?.innerText ?? "0");
+  late final double altim_in_hg = double.parse(metarElement.getElement('altim_in_hg')?.innerText ?? "0");
   /// internal flight category from data
-  late FlightCategory _flight_category = FlightCategory.parse(metarElement.getElement('flight_category')?.innerText ?? "NONE");
-  /// Flight category VFR, MVFR, IFR or LIFR
-  FlightCategory get flightCategory => this._flight_category == FlightCategory.NONE ? FlightCategory.calc(this) : this._flight_category;
-  /// weather text
-  late String? wx_string = metarElement.getElement('wx_string')?.innerText;
+  late final FlightCategory _flight_category = FlightCategory.parse(metarElement.getElement('flight_category')?.innerText ?? "NONE");
+    /// weather text
+  late final String? wx_string = metarElement.getElement('wx_string')?.innerText;
   /// Decoded weather or null if not reported
-  late PresentWeather? weather = wx_string != null ? PresentWeather.parse(wx_string!) : null;
+  late final PresentWeather? weather = wx_string != null ? PresentWeather.parse(wx_string!) : null;
   /// cloud information
-  late CloudStack sky_condition = CloudStack.fromElement(metarElement);
-  /// base AGL of lowest significant cloud
-  late int? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
+  late final CloudStack sky_condition = CloudStack.fromElement(metarElement);
   /// precipation
-  late double precip_in = double.parse(metarElement.getElement('precip_in')?.innerText ?? "0");
+  late final double precip_in = double.parse(metarElement.getElement('precip_in')?.innerText ?? "0");
   /// temperatures
-  late double temp_c = double.parse(metarElement.getElement('temp_c')?.innerText ?? "0");
-  late double dewpoint_c = double.parse(metarElement.getElement('dewpoint_c')?.innerText ?? "0");
+  late final double temp_c = double.parse(metarElement.getElement('temp_c')?.innerText ?? "0");
+  late final double dewpoint_c = double.parse(metarElement.getElement('dewpoint_c')?.innerText ?? "0");
   /// internal visibility string
-  late String? _visibilityStr = metarElement.getElement('visibility_statute_mi')?.innerText;
+  late final String? _visibilityStr = metarElement.getElement('visibility_statute_mi')?.innerText;
   /// visibility status miles
-  late double? visibility_statute_mi = (() {
+  late final double? visibility_statute_mi = (() {
     if (_visibilityStr != null) {
       var match = RegExp(r'\d+').firstMatch(_visibilityStr!);
       if (match != null && match[0] != null) {
@@ -72,7 +66,13 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
     }
     return null;
   })();
+
+  /// FlightCategoryRelated
+  /// base AGL of lowest significant cloud
+  late final int? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
   /// horizontal visibility in always in status miles
-  double? get visibility => this.visibility_statute_mi;
+  double? get lowestVisibility => this.visibility_statute_mi;
+  /// Flight category VFR, MVFR, IFR or LIFR
+  late FlightCategory flightCategory = this._flight_category == FlightCategory.NONE ? FlightCategory.calc(this) : this._flight_category;
 }
 

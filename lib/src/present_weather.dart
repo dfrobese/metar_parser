@@ -55,7 +55,6 @@ class PresentWeather {
 
 
    String toString() {
-
     return text;
 
    }

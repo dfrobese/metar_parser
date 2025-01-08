@@ -21,7 +21,7 @@ enum FlightCategory {
    /// VFR Visual Flight Rules	Green	greater than 3,000 feet AGL	and	greater than 5 miles
   factory FlightCategory.calc(FlightCategoryRelated val) {
 
-     var limit = val.visibility;
+     var limit = val.lowestVisibility;
      var lowest = val.lowestSignificantCloudBase;
 
      if (limit == null || lowest == null) {
@@ -47,14 +47,72 @@ enum FlightCategory {
        }
      }
    }
+
+   static List<FlightCategory> calculateFlightCategories(
+       List<FlightCategoryRelated> entries,
+       FlightCategory Function(FlightCategoryRelated) calc) {
+
+     if (entries.isEmpty) {
+       return [];
+     }
+
+     // List to store the results
+     final List<FlightCategory> results = [];
+
+     // Variables to store the predecessor's values
+     double? lastVisibility;
+     int? lastCloudBase;
+
+     for (final entry in entries) {
+       // Use current values if not null, otherwise fallback to the last known values
+       final currentVisibility = entry.lowestVisibility ?? lastVisibility;
+       final currentCloudBase = entry.lowestSignificantCloudBase ?? lastCloudBase;
+
+       if (currentVisibility == null || currentCloudBase == null) {
+         throw ArgumentError(
+             "Unable to calculate FlightCategory; insufficient data for entry: $entry");
+       }
+
+       // Update the entry with fallback values
+       final adjustedEntry = _AdjustedFlightCategoryRelated(
+         currentVisibility,
+         currentCloudBase,
+       );
+       // use the value to set flightcategory
+       final flightCategory = calc(adjustedEntry);
+       entry.flightCategory = flightCategory;
+
+       // Update the last known values
+       lastVisibility = currentVisibility;
+       lastCloudBase = currentCloudBase;
+     }
+
+     return results;
    }
 
+}
 
+/// Helper class to wrap adjusted FlightCategoryRelated values
+class _AdjustedFlightCategoryRelated implements FlightCategoryRelated {
+  @override
+  final double lowestVisibility;
+
+  @override
+  final int lowestSignificantCloudBase;
+
+  _AdjustedFlightCategoryRelated(this.lowestVisibility, this.lowestSignificantCloudBase);
+
+  @override late FlightCategory flightCategory;
+}
+
+/// abstract class to calculate the flight category for forecasts and metars in the same way
 abstract class  FlightCategoryRelated {
   /// get visibilty in status miles SM
-  double? get visibility;
+  double? get lowestVisibility;
   /// get lowest significant cloudbase in feet AGL
   int? get lowestSignificantCloudBase;
+  ///
+  late FlightCategory flightCategory;
 }
 
 

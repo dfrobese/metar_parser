@@ -8,7 +8,6 @@ import 'package:test/scaffolding.dart';
 void main () {
   test('Metar test', () async {
 
-
     final lfbm =  MetarTafRawParser.parseMetarRawText("METAR LFBM 162130Z AUTO 06003KT CAVOK 07/06 Q1020 BECMG 0500 FG");
     lfbm.forEach((key, value) {
       print("$key $value");
@@ -43,7 +42,6 @@ void main () {
     expect(lfbd["changeMetar"], "TEMPO 0500 FG VV///");
 
 
-
     // EDDV 151420Z AUTO 26005KT 9999 OVC022 09/06 Q1025 NOSIG
     final eddv =  MetarTafRawParser.parseMetarRawText("METAR EDDV 151420Z AUTO 26005KT 9999 OVC022 09/06 Q1025 NOSIG");
     eddv.forEach((key, value) {
@@ -60,10 +58,7 @@ void main () {
     expect(eddv["altimeter"], "Q1025");
     expect(eddv["changeMetar"], "NOSIG");
 
-
-
     ///
-    //
     final Map<String, MetarTDS> metars = await MetarController().fullRequest();
 
     final map = metars['EDDV'] ;
