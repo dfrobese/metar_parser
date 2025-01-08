@@ -20,6 +20,9 @@ void main () {
     // check visibility
     expect(tafRaw.forecasts[0].visibility!.minVisibility == 9999, true);
     expect(tafRaw.forecasts[2].visibility!.minVisibility == 3500, true);
+    // check flight category
+    expect(tafRaw.forecasts[0].flightCategory == FlightCategory.MVFR, true);
+    expect(tafRaw.forecasts[1].flightCategory == FlightCategory.IFR, true);
   });
 
   test('Taf full test', () async {
@@ -61,6 +64,7 @@ void main () {
           expect(tafFromRaw.forecasts.first.visibility!.minInMiles,
             closeTo(element.forecasts.first.visibility!.minInMiles, 0.5));
         }
+        expect (tafFromRaw.forecasts.first.flightCategory == element.forecasts.first.flightCategory, true);
       } catch (e) {
         failureCount++;
         print("Raw not fitted for ${element.station_id}");

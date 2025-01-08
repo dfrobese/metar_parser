@@ -34,23 +34,28 @@ class CloudList<T extends CloudLayer> extends ListBase<T> {
 class CloudStack extends CloudList<CloudLayer> {
   CloudStack();
   /// Create object from string
-  factory CloudStack.fromElement(XmlElement metarElement) {
+  static CloudStack? fromElement(XmlElement metarElement) {
 
-    final stack = new CloudStack();
+
     // check for VV
     final vv_condition = metarElement.getElement('vert_vis_ft')?.innerText;
     if (vv_condition != null) {
+       final stack = new CloudStack();
        final layer = CloudLayer.from(CloudCoverage.VV, int.parse(vv_condition));
        stack.add(layer);
        return stack;
     }
     // All other are cloud layers
     final sky_condition = metarElement.findElements('sky_condition');
-    for (var sky in sky_condition) {
-      final layer = CloudLayer.fromElement(sky);
-      stack.add(layer);
+    if (sky_condition.length > 0) {
+      final stack = new CloudStack();
+      for (var sky in sky_condition) {
+        final layer = CloudLayer.fromElement(sky);
+        stack.add(layer);
+      }
+      return stack;
     }
-    return stack;
+    return null;
   }
 
   /// Parses a TAF cloud string into a list of CloudLayer objects.

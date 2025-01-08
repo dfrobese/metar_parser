@@ -110,6 +110,8 @@ enum MetarRawElement {
     changeMetar,
     remark
   ];
+
+
   static const tafSequence = [
     windGusts,
     windVaries,

@@ -4,9 +4,11 @@ import 'package:metar_parser_dart/src/wind.dart';
 import 'package:metar_parser_dart/src/raw_parser/metar_raw_parser.dart';
 
 import '../../metar_parser_dart.dart';
+import '../cloud_coverage.dart';
 import '../cloud_stack.dart';
 import '../tds_parser/forecast_tds.dart';
 import '../present_weather.dart';
+import '../units/distance_unit.dart';
 
 class ForecastRaw implements FlightCategoryRelated {
   final DateTime fcstTimeFrom;
@@ -62,9 +64,21 @@ class ForecastRaw implements FlightCategoryRelated {
   /// Decoded weather or null if not reported
   late final List<PresentWeather>? weather = _wx_list != null ? _wx_list!.map((e) =>  PresentWeather.parse(e)).toList() : null;
   /// cloud information
-  late final CloudStack sky_condition = CloudStack.fromRaw(data[MetarRawElement.clouds.name]??"");
+  late final CloudStack ?sky_condition = data[MetarRawElement.clouds.name] != null ? CloudStack.fromRaw(data[MetarRawElement.clouds.name]!) : null;
   /// Horizontal visibility
-  late final Visibility ?visibility = data[MetarRawElement.visibility.name] != null ? Visibility.parse(data[MetarRawElement.visibility.name]!) : null;
+  late final Visibility ?visibility = (() {
+    if (data[MetarRawElement.visibility.name] != null) {
+      return Visibility.parse(data[MetarRawElement.visibility.name]!);
+    } else if (this.changeIndicator == ChangeIndicator.TAF) {
+      // default on TAF beginning if no value is given
+      return Visibility(6.0, DistanceUnit.SM, true);
+    } else if (sky_condition != null && sky_condition!.length > 0 && sky_condition!.first.coverage == CloudCoverage.CAVOK) {
+      // if CAVOK set to P6SM
+       return Visibility(6.0, DistanceUnit.SM, true);
+    }
+    return null;
+  })();
+
    /// raw String build from parsed parts
   late final String rawPart = data.entries
       .where((e) => e.key != "raw")
@@ -119,7 +133,6 @@ class ForecastRaw implements FlightCategoryRelated {
     final fromHour = int.parse(time.substring(2, 4));
     final fromMin = int.parse(time.substring(4, 6));
 
-
     final validTimeFrom = DateTime.utc(now.year, now.month, fromDay, fromHour, fromMin);
 
 
@@ -127,9 +140,10 @@ class ForecastRaw implements FlightCategoryRelated {
   }
   /// Flightcategory related
   /// base AGL of lowest significant cloud in feet
-  late final int? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
+  late final int? lowestSignificantCloudBase = this.sky_condition?.lowestSignificantCloudBase??null;
   /// lowest visibility in miles
-  late final double? lowestVisibility = visibility?.minInMiles;
-
-  late FlightCategory flightCategory = FlightCategory.NONE;
+  late final double? lowestVisibility =  this.visibility?.minInMiles ??null;
+  /// flight category, preset is calcutalion based on current values
+  late FlightCategory flightCategory = FlightCategory.calc(this);
 }
+

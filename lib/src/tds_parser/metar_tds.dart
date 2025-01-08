@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:metar_parser_dart/src/cloud_stack.dart';
 import 'package:metar_parser_dart/src/flight_category.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
+import 'package:metar_parser_dart/src/tds_parser/forecast_tds.dart';
 import 'package:metar_parser_dart/src/wind.dart';
 import 'package:country/country.dart';
 import 'package:xml/xml.dart';
@@ -48,7 +49,7 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
   /// Decoded weather or null if not reported
   late final PresentWeather? weather = wx_string != null ? PresentWeather.parse(wx_string!) : null;
   /// cloud information
-  late final CloudStack sky_condition = CloudStack.fromElement(metarElement);
+  late final CloudStack? sky_condition = CloudStack.fromElement(metarElement);
   /// precipation
   late final double precip_in = double.parse(metarElement.getElement('precip_in')?.innerText ?? "0");
   /// temperatures
@@ -64,15 +65,21 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
         return double.parse(match[0]!);
       }
     }
+    // check if CAVOK
+    if (this.sky_condition?.first.coverage == CloudCoverage.CAVOK) {
+      return 6.0;
+    }
     return null;
   })();
 
   /// FlightCategoryRelated
   /// base AGL of lowest significant cloud
-  late final int? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
+  late final int? lowestSignificantCloudBase = this.sky_condition?.lowestSignificantCloudBase??null;
   /// horizontal visibility in always in status miles
   double? get lowestVisibility => this.visibility_statute_mi;
   /// Flight category VFR, MVFR, IFR or LIFR
   late FlightCategory flightCategory = this._flight_category == FlightCategory.NONE ? FlightCategory.calc(this) : this._flight_category;
+  /// get type of change
+  ChangeIndicator get changeIndicator => ChangeIndicator.METAR;
 }
 

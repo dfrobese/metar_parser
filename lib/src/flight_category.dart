@@ -1,4 +1,7 @@
 
+import 'package:metar_parser_dart/src/tds_parser/forecast_tds.dart';
+import 'dart:developer' as developer;
+
 /// class to hande the flight category of a Metar
 enum FlightCategory {
   VFR, MVFR, IFR, LIFR, NONE ;
@@ -49,8 +52,7 @@ enum FlightCategory {
    }
 
    static List<FlightCategory> calculateFlightCategories(
-       List<FlightCategoryRelated> entries,
-       FlightCategory Function(FlightCategoryRelated) calc) {
+       List<FlightCategoryRelated> entries) {
 
      if (entries.isEmpty) {
        return [];
@@ -69,27 +71,32 @@ enum FlightCategory {
        final currentCloudBase = entry.lowestSignificantCloudBase ?? lastCloudBase;
 
        if (currentVisibility == null || currentCloudBase == null) {
-         throw ArgumentError(
+         // no calculation possible
+         entry.flightCategory = FlightCategory.NONE;
+         developer.log(
              "Unable to calculate FlightCategory; insufficient data for entry: $entry");
-       }
 
-       // Update the entry with fallback values
-       final adjustedEntry = _AdjustedFlightCategoryRelated(
-         currentVisibility,
-         currentCloudBase,
-       );
-       // use the value to set flightcategory
-       final flightCategory = calc(adjustedEntry);
-       entry.flightCategory = flightCategory;
+       } else {
+        // Update the entry with fallback values
+        final adjustedEntry = _AdjustedFlightCategoryRelated(
+          currentVisibility,
+          currentCloudBase,
+        );
+        // use the value to set flightcategory
+        final flightCategory = FlightCategory.calc(adjustedEntry);
+        entry.flightCategory = flightCategory;
 
-       // Update the last known values
-       lastVisibility = currentVisibility;
-       lastCloudBase = currentCloudBase;
-     }
+        // Update the last known values only if none temporary
+        if (entry.changeIndicator != ChangeIndicator.TEMPO &&
+            entry.changeIndicator != ChangeIndicator.INTER) {
+          lastVisibility = currentVisibility;
+          lastCloudBase = currentCloudBase;
+        }
+      }
+    }
 
      return results;
    }
-
 }
 
 /// Helper class to wrap adjusted FlightCategoryRelated values
@@ -103,6 +110,8 @@ class _AdjustedFlightCategoryRelated implements FlightCategoryRelated {
   _AdjustedFlightCategoryRelated(this.lowestVisibility, this.lowestSignificantCloudBase);
 
   @override late FlightCategory flightCategory;
+
+  @override ChangeIndicator get changeIndicator => ChangeIndicator.TAF;
 }
 
 /// abstract class to calculate the flight category for forecasts and metars in the same way
@@ -111,8 +120,10 @@ abstract class  FlightCategoryRelated {
   double? get lowestVisibility;
   /// get lowest significant cloudbase in feet AGL
   int? get lowestSignificantCloudBase;
-  ///
+  /// flight category placeholder
   late FlightCategory flightCategory;
+  /// change indicator
+  ChangeIndicator get changeIndicator;
 }
 
 

@@ -10,7 +10,7 @@ import 'package:xml/xml.dart';
 import '../../metar_parser_dart.dart';
 
 enum ChangeIndicator {
-  TAF, FM, BECMG, PROB, TEMPO, INTER;
+  METAR, TAF, FM, BECMG, PROB, TEMPO, INTER;
 
   /// Create object from string
   factory ChangeIndicator.parse(String str) {
@@ -62,9 +62,9 @@ class ForecastTDS implements FlightCategoryRelated {
   /// Decoded weather or null if not reported
   late final PresentWeather? weather = wx_string != null ? PresentWeather.parse(wx_string!) : null;
   /// cloud information
-  late final CloudStack sky_condition = CloudStack.fromElement(fcstElement);
+  late final CloudStack? sky_condition = CloudStack.fromElement(fcstElement);
   /// base AGL of lowest significant cloud
-  late final int? lowestSignificantCloudBase = this.sky_condition.lowestSignificantCloudBase;
+  late final int? lowestSignificantCloudBase = this.sky_condition?.lowestSignificantCloudBase??null;
   /// ambient pressure
   late final double altim_in_hg = double.parse(fcstElement.getElement('altim_in_hg')?.innerText ?? "0");
   /// tempertures
@@ -75,16 +75,21 @@ class ForecastTDS implements FlightCategoryRelated {
   /// visibility status miles
   late final Visibility? visibility = (() {
     if (_visibilityStr != null) {
+      // if an string exists, parse it
       var match = RegExp( r'(?<miles>\d{1,2}(\.\d{1,2})?)(?<greater>\+)?' ).firstMatch(_visibilityStr!);
       if (match != null && match.namedGroup('miles') != null) {
         final value = double.parse(match.namedGroup('miles')!);
         final greater = match.namedGroup('greater') != null;
         return Visibility(value, DistanceUnit.SM, greater);
       }
+    } else if (this.changeIndicator == ChangeIndicator.TAF) {
+      // default on TAF beginning if no value is given
+      return Visibility(6.0, DistanceUnit.SM, true);
     }
     return null;
   })();
   /// lowest visibility in miles
   late final double? lowestVisibility = visibility?.minInMiles;
-  late FlightCategory flightCategory = FlightCategory.NONE;
+  /// preset
+  late FlightCategory flightCategory = FlightCategory.calc(this);
 }

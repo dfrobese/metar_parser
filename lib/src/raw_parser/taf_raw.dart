@@ -1,3 +1,4 @@
+import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/tds_parser/forecast_tds.dart';
 import 'dart:developer' as developer;
 import 'forecast_raw.dart';
@@ -44,7 +45,11 @@ class TafRaw {
   }
 
   /// Sorting by fcstTimeFrom, then fcstTimeTo, then ChangeIndicator
-  late List<ForecastRaw> forecasts = List.from(data.map((e) => ForecastRaw.fromMap(e)));
+  late final List<ForecastRaw> forecasts = (() {
+    final List<ForecastRaw> list = List.from(data.map((e) => ForecastRaw.fromMap(e)));
+    FlightCategory.calculateFlightCategories(list);
+    return list;
+  })();
 
   ForecastRaw? getBy(ChangeIndicator change, DateTime from, DateTime to) {
       try {
