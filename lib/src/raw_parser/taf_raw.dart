@@ -1,7 +1,9 @@
 import 'package:metar_parser_dart/metar_parser_dart.dart';
+import 'package:metar_parser_dart/src/raw_parser/metar_raw_parser.dart';
 import 'package:metar_parser_dart/src/tds_parser/forecast_tds.dart';
 import 'dart:developer' as developer;
 import 'forecast_raw.dart';
+import '../extension/date_time.dart';
 
 /// Taf content derived from raw text
 class TafRaw {
@@ -9,48 +11,47 @@ class TafRaw {
   final DateTime issueTime;
   final List<Map<String, String?>> data;
 
-  TafRaw(
+  TafRaw._(
       {required this.stationId, required this.issueTime, required this.data});
 
-  factory TafRaw.fromMap(List<Map<String, String?>> data) {
+  /// create TafRaw object from given list of maps
+  factory TafRaw._fromMap(List<Map<String, String?>> data) {
+    // first entry includes the taf header followed bei forecast groups
     final tafData = data[0];
-    final stationId = tafData['station'] ?? '';
-    // published time set ore reconstructed from endurance start
-    final issueTimeString = tafData['published'] ??
-        "${tafData['endurance']?.substring(0, 4) ?? ""}00";
-    final issueTime = _parseIssueTime(issueTimeString);
-    // look for Taf appendix
+    final stationId = tafData[MetarTafRawElement.station.name] ?? '';
+    // published time set or reconstructed time from endurance start
+    final enduranceString = "${tafData[MetarTafRawElement.endurance.name]?.substring(0, 4) ?? " "}";
+    final issueTimeString = tafData[MetarTafRawElement.published.name] ?? "${enduranceString}00";
+    final issueTime = DateTimeExtension.parseIssueTime(issueTimeString);
 
-    return TafRaw(
+    return TafRaw._(
         stationId: stationId,
         issueTime: issueTime,
         // Assuming bulletinTime matches issueTime
         data: data);
   }
 
+  /// Parse a raw Taf string and give back a TafRaw object
+  factory TafRaw.parse(String rawText) {
+    final mapFromRaw = MetarTafRawParser.parseTafRawText(rawText);
+    return TafRaw._fromMap(mapFromRaw);
+  }
+
   /// raw taf of this parts
   late final String rawPart = data.map((e) => e.values.join(" ").trim()).join(' ');
 
   /// raw taf string of whole taf including the forecasts
-  late String rawText = (forecasts.map((e) => e.rawPart.trim()).join(' '));
+  late final String rawText = (forecasts.map((e) => e.rawPart.trim()).join(' '));
 
-  static DateTime _parseIssueTime(String issueTimeString) {
-    // Assuming the format is "ddhhmmZ"
-    final now = DateTime.now().toUtc();
-    final day = int.parse(issueTimeString.substring(0, 2));
-    final hour = int.parse(issueTimeString.substring(2, 4));
-    final minute = int.parse(issueTimeString.substring(4, 6));
 
-    return DateTime.utc(now.year, now.month, day, hour, minute);
-  }
-
-  /// Sorting by fcstTimeFrom, then fcstTimeTo, then ChangeIndicator
+  /// Sorted list of forecasts by fcstTimeFrom, then fcstTimeTo, then ChangeIndicator
   late final List<ForecastRaw> forecasts = (() {
     final List<ForecastRaw> list = List.from(data.map((e) => ForecastRaw.fromMap(e)));
     FlightCategory.calculateFlightCategories(list);
     return list;
   })();
 
+  /// get Taf from list by change indicator, and date time
   ForecastRaw? getBy(ChangeIndicator change, DateTime from, DateTime to) {
       try {
         if (change == ChangeIndicator.TAF || change == ChangeIndicator.FM || change == ChangeIndicator.BECMG) {

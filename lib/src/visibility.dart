@@ -16,9 +16,10 @@ class Visibility {
   /// Factory constructor to parse visibility from a TAF string
   factory Visibility.parse(String tafString) {
     final RegExp visibilityRegex = RegExp(
-        r'(?<greaterThan>P?)' // Optional "P" for greater-than flag
-        r'(?<miles>\d\s\d\/\d|\d\/\d|\d{1,2})' // Integer, fractional, or mixed miles
-        r'(?<unit>SM)|(?<meters>\d{4})(?:\s(?<metersMax>\d{4}))?' // Meters with optional range
+        r'(?<greaterLessThan>[PM]?)' // Optional "P" for greater-than flag or M
+        r'(?<miles>\d\s\d\/\d|\d\/\d|\d{1,2}\s?)' // Integer, fractional, or mixed miles
+        r'(?<unit>SM)|(?<meters>\d{4})(?<direction>[NSEW]{1,2})?(?:\s(?<metersMax>\d{4}))?'
+          //r'(?<unit>SM)|(?<meters>\d{4})(?:\s(?<metersMax>\d{4}))?' // Meters with optional range
     );
 
     final match = visibilityRegex.firstMatch(tafString);
@@ -35,8 +36,8 @@ class Visibility {
     if (match.namedGroup('miles') != null) {
       unit = DistanceUnit.SM;
 
-      final greaterThan = match.namedGroup('greaterThan');
-      final miles = match.namedGroup('miles')!;
+      final greaterThan = match.namedGroup('greaterLessThan');
+      final miles = match.namedGroup('miles')!.trim();
 
       if (greaterThan == "P") {
         isGreaterThanMin = true;

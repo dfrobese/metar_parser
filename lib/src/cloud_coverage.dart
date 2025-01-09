@@ -57,6 +57,9 @@ enum CloudCoverage {
     assert(this.index <= CloudCoverage._defaultAppearances.length);
     return CloudCoverage._defaultAppearances[this.index].symbol;
   }
+
+  /// Coverage is special acynym with implicit cloudbases
+  bool get isSpecialAcronym => this.index >= CloudCoverage.SKC.index;
 }
 
 class CloudAppearance {

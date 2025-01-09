@@ -1,5 +1,5 @@
 name: metar_parser_dart
-description: Parse Meteorological Weather reports emited from aeronautical land stations (METAR). Coming soon TAF and SYNOP.
+description: Parse Meteorological Weather reports emitted from aeronautical land stations (METAR)and TAF.
 version: 0.0.1
 # repository: https://github.com/TAF-Verification/metar-dart
 # documentation: https://github.com/TAF-Verification/metar-dart/blob/main/doc/docs.md
@@ -16,6 +16,7 @@ dependencies:
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
   http: ^1.2.2
+  intl: ^0.20.1
  # quiver: ^3.1.0
   # tuple: ^2.0.0
 

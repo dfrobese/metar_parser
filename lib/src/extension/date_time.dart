@@ -1,0 +1,36 @@
+import "package:intl/intl.dart";
+
+extension DateTimeExtension on DateTime {
+
+  /// create Metar timesting hhmmz
+  String toTimeString() {
+    final f = NumberFormat("00");
+    return "${f.format(hour)}:${f.format(minute)}${isUtc ? "z" : ""}";
+  }
+
+  /// parse issue time of Taf format is "ddhhmmZ" month and
+  /// year will be set to current date
+  static DateTime parseIssueTime(String issueTimeString) {
+    // Assuming the format is "ddhhmmZ"
+    final now = DateTime.now().toUtc();
+    final day = int.parse(issueTimeString.substring(0, 2));
+    final hour = int.parse(issueTimeString.substring(2, 4));
+    final minute = int.parse(issueTimeString.substring(4, 6));
+    return DateTime.utc(now.year, now.month, day, hour, minute);
+  }
+
+  /// parse valid date from/to string, assuming the format is ""ddhh/ddhh"
+  static List<DateTime> parseValidTimes(String endurance) {
+    // Assuming the format is "ddhh/ddhh"
+    final now = DateTime.now().toUtc();
+
+    final fromDay = int.parse(endurance.substring(0, 2));
+    final fromHour = int.parse(endurance.substring(2, 4));
+    final toDay = int.parse(endurance.substring(5, 7));
+    final toHour = int.parse(endurance.substring(7, 9));
+    final validTimeFrom = DateTime.utc(now.year, now.month, fromDay, fromHour);
+    final validTimeTo = DateTime.utc(now.year, now.month, toDay, toHour);
+    return [validTimeFrom, validTimeTo];
+  }
+
+}

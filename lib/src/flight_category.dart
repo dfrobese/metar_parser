@@ -27,11 +27,15 @@ enum FlightCategory {
      var limit = val.lowestVisibility;
      var lowest = val.lowestSignificantCloudBase;
 
-     if (limit == null || lowest == null) {
-        return FlightCategory.NONE;
+     if (limit == null && lowest == null) {
+       return FlightCategory.NONE;
+     } else if (limit == null && lowest != null) {
+        return  (lowest < 500) ? FlightCategory.LIFR : FlightCategory.NONE;
+     } else if (lowest == null && limit != null) {
+       return  (limit < 1) ? FlightCategory.LIFR : FlightCategory.NONE;
      }
 
-     if (limit < 1 || lowest < 500) {
+     if (limit! < 1 || lowest! < 500) {
        return FlightCategory.LIFR;
      } else if (limit < 3) {
        return FlightCategory.IFR;
@@ -70,7 +74,7 @@ enum FlightCategory {
        final currentVisibility = entry.lowestVisibility ?? lastVisibility;
        final currentCloudBase = entry.lowestSignificantCloudBase ?? lastCloudBase;
 
-       if (currentVisibility == null || currentCloudBase == null) {
+       if (currentVisibility == null && currentCloudBase == null) {
          // no calculation possible
          entry.flightCategory = FlightCategory.NONE;
          developer.log(
@@ -89,8 +93,12 @@ enum FlightCategory {
         // Update the last known values only if none temporary
         if (entry.changeIndicator != ChangeIndicator.TEMPO &&
             entry.changeIndicator != ChangeIndicator.INTER) {
-          lastVisibility = currentVisibility;
-          lastCloudBase = currentCloudBase;
+          if (currentVisibility != null) {
+            lastVisibility = currentVisibility;
+          }
+          if (currentCloudBase != null) {
+              lastCloudBase = currentCloudBase;
+          }
         }
       }
     }
@@ -102,10 +110,10 @@ enum FlightCategory {
 /// Helper class to wrap adjusted FlightCategoryRelated values
 class _AdjustedFlightCategoryRelated implements FlightCategoryRelated {
   @override
-  final double lowestVisibility;
+  final double? lowestVisibility;
 
   @override
-  final int lowestSignificantCloudBase;
+  final int? lowestSignificantCloudBase;
 
   _AdjustedFlightCategoryRelated(this.lowestVisibility, this.lowestSignificantCloudBase);
 

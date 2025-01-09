@@ -1,5 +1,4 @@
 import 'package:metar_parser_dart/metar_parser_dart.dart';
-import 'package:metar_parser_dart/src/raw_parser/metar_raw_parser.dart';
 import 'package:metar_parser_dart/src/raw_parser/taf_raw.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
@@ -8,9 +7,9 @@ void main () {
   test('Fixed Taf EDDV test', () {
     //EDDV single
     final eddvRawTaf = "TAF EDDV 200500Z 2006/2106 26009KT 9999 SCT008 BKN020 TEMPO 2006/2010 BKN008 PROB30 TEMPO 2006/2014 3500 -SHSNRA BKN012TCU TEMPO 2014/2020 2500 SHSNRA BKN010CB PROB30 TEMPO 2016/2019 28015G30KT 1400 SHSNGS BKN006CB PROB30 TEMPO 2020/2101 2500 -SHSNRA BKN006TCU BECMG 2100/2102 23004KT TEMPO 2101/2106 4000 BR BKN008";
-    final map = MetarTafRawParser.parseTafRawText(eddvRawTaf);
-    final tafRaw = TafRaw.fromMap(map);
+    final tafRaw = TafRaw.parse(eddvRawTaf);
     expect(eddvRawTaf == tafRaw.rawText, true);
+    expect(tafRaw.stationId == "EDDV", true);
     // check cloudbase
     expect(tafRaw.forecasts[0].lowestSignificantCloudBase == 2000, true);
     expect(tafRaw.forecasts[1].lowestSignificantCloudBase == 800, true);
@@ -35,8 +34,7 @@ void main () {
     print(eddv.station_id);
     print(eddv.rawText);
     // compare actual taf in raw
-    final parsedMap = MetarTafRawParser.parseTafRawText(eddv.rawText);
-    final tafFromRaw = TafRaw.fromMap(parsedMap);
+    final tafFromRaw = TafRaw.parse(eddv.rawText);
     final rawRebuild = tafFromRaw.rawText;
     expect(eddv.rawText == rawRebuild, true);
     expect (tafFromRaw.forecasts.first.lowestSignificantCloudBase == eddv.forecasts.first.lowestSignificantCloudBase, true);
@@ -46,15 +44,13 @@ void main () {
       print(tafFromRaw.forecasts.first.visibility.toString());
       print(eddv.forecasts.first.visibility.toString());
     }
-    print("${eddv.rawFormatedText}");
+
 
      // for all tafs
     var failureCount = 0;
     tafs.values.forEach((element) {
       final rawOrg = element.rawText.startsWith("TAF") ? element.rawText.trim() : "TAF " + element.rawText.trim();
-
-      final mapFromRaw = MetarTafRawParser.parseTafRawText(rawOrg);
-      final tafFromRaw = TafRaw.fromMap(mapFromRaw);
+      final tafFromRaw = TafRaw.parse(rawOrg);
       final rawRebuild = tafFromRaw.rawText;
 
       try {

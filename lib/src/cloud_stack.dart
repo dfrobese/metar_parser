@@ -4,7 +4,7 @@ import 'package:metar_parser_dart/src/cloud_layer.dart';
 import 'package:xml/xml.dart';
 
 
-/// Stack of clouds
+/// Stack of cloud layers
 class CloudList<T extends CloudLayer> extends ListBase<T> {
   List innerList = List.generate(0, (index) => null);
 
@@ -30,13 +30,11 @@ class CloudList<T extends CloudLayer> extends ListBase<T> {
   CloudList();
 }
 
-
+/// Represents a stack of cloud layers
 class CloudStack extends CloudList<CloudLayer> {
   CloudStack();
   /// Create object from string
   static CloudStack? fromElement(XmlElement metarElement) {
-
-
     // check for VV
     final vv_condition = metarElement.getElement('vert_vis_ft')?.innerText;
     if (vv_condition != null) {
@@ -71,7 +69,7 @@ class CloudStack extends CloudList<CloudLayer> {
        return stack;
     }
 
-    // create cloud stack
+    // create cloud stack from VVxxx, SCTxxx, FEWxxx, BKNxxx, OVCxxx
     final RegExp cloudRegex = RegExp("(${CloudCoverage.regCloudStr})(\\d{3})");
     final matches = cloudRegex.allMatches(tafCloudString);
 
@@ -90,10 +88,17 @@ class CloudStack extends CloudList<CloudLayer> {
     return stack;
   }
 
+  /// return lowest significant cloudbase from stack where coverage > 3/8
   int? _lowestSignificantCloudBase() {
+    // if empty, return null
     if (this.isEmpty) {
        return null;
     }
+    // if only one, don't look for lowest, take it
+    if (this.length == 1 && this.first.coverage.isSpecialAcronym) {
+       return this.first.baseAGL;
+    }
+    // look for lowest in the stack
     var lowestAGL = CloudCoverage.SKC.defaultCloudbase;
     this.forEach((element) {
           if (element.coverage.cloudCover >= CloudCoverage.BKN.cloudCover &&
@@ -104,6 +109,7 @@ class CloudStack extends CloudList<CloudLayer> {
     return lowestAGL;
   }
 
+  /// return lowest significant cloudbase where coverage > 3/8
   late final int? lowestSignificantCloudBase = this._lowestSignificantCloudBase();
 }
 

@@ -9,7 +9,6 @@ import 'package:country/country.dart';
 import 'package:xml/xml.dart';
 import '../cloud_coverage.dart';
 import '../present_weather.dart';
-import '../raw_parser/metar_raw_parser.dart';
 
 
 class MetarTDS implements TDSElement, FlightCategoryRelated {
@@ -36,8 +35,6 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
   late final Coordinate coordinate = Coordinate(latitude: latitude, longitude: longitude);
   /// elevation of station
   late final double elevation_m = double.parse(metarElement.getElement('elevation_m')?.innerText ?? "0");
-  /// parsed raw text information
-  late final Map<String, String?> parsedRawText = MetarTafRawParser.parseMetarRawText(raw_text);
   /// get wind parameters
   late final Wind wind = Wind.fromElement(metarElement);
   /// ambient pressure

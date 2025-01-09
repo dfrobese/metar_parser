@@ -1,8 +1,8 @@
 // Forecast as part of a TafTDS
+import 'package:metar_parser_dart/src/extension/date_time.dart';
 import 'package:metar_parser_dart/src/visibility.dart';
 import 'package:metar_parser_dart/src/wind.dart';
 import 'package:metar_parser_dart/src/raw_parser/metar_raw_parser.dart';
-
 import '../../metar_parser_dart.dart';
 import '../cloud_coverage.dart';
 import '../cloud_stack.dart';
@@ -10,6 +10,7 @@ import '../tds_parser/forecast_tds.dart';
 import '../present_weather.dart';
 import '../units/distance_unit.dart';
 
+/// Class defines a forecast in a raw TAF message
 class ForecastRaw implements FlightCategoryRelated {
   final DateTime fcstTimeFrom;
   final DateTime fcstTimeTo;
@@ -24,15 +25,16 @@ class ForecastRaw implements FlightCategoryRelated {
         required this.probability,
         required this.data});
 
+  /// create forecast object from a given key/value map created by the parser
   factory ForecastRaw.fromMap(Map<String, String?> data) {
-    var changeText = data[MetarRawElement.change_indicator.name] ?? 'TAF';
+    var changeText = data[MetarTafRawElement.change_indicator.name] ?? 'TAF';
     // parse change indicator
     final map = _parseIndicator(changeText);
     // get change Indicator
     final changeIndicator = ChangeIndicator.parse(map["indicator"]!);
     // From indicator
     if (changeIndicator == ChangeIndicator.FM) {
-      final from = _parseValidFrom(map["value"]!);
+      final from = DateTimeExtension.parseIssueTime(map["value"]!);
       return ForecastRaw(
           fcstTimeFrom: from,
           fcstTimeTo: from.add(Duration(hours: 12)), // interims setting
@@ -46,8 +48,8 @@ class ForecastRaw implements FlightCategoryRelated {
         ? int.parse(map["value"]!)
         : 100;
     // endurance
-    final endurance = data[MetarRawElement.endurance.name] ?? '0000/0000';
-    final validTimes = _parseValidTimes(endurance);
+    final endurance = data[MetarTafRawElement.endurance.name] ?? '0000/0000';
+    final validTimes = DateTimeExtension.parseValidTimes(endurance);
 
     return ForecastRaw(
         fcstTimeFrom: validTimes[0],
@@ -58,26 +60,15 @@ class ForecastRaw implements FlightCategoryRelated {
   }
 
   /// get wind parameters
-  late final Wind? wind = Wind.parse("${data[MetarRawElement.windGusts.name]??""} ${data[MetarRawElement.windVaries.name]??""}".trim());
+  late final Wind? wind = Wind.parse("${data[MetarTafRawElement.windGusts.name]??""} ${data[MetarTafRawElement.windVaries.name]??""}".trim());
   /// weather text
-  late final List<String>? _wx_list = (data[MetarRawElement.weatherTaf.name]??"").split(" ");
+  late final List<String>? _wx_list = (data[MetarTafRawElement.weatherTaf.name]??"").split(" ");
   /// Decoded weather or null if not reported
   late final List<PresentWeather>? weather = _wx_list != null ? _wx_list!.map((e) =>  PresentWeather.parse(e)).toList() : null;
   /// cloud information
-  late final CloudStack ?sky_condition = data[MetarRawElement.clouds.name] != null ? CloudStack.fromRaw(data[MetarRawElement.clouds.name]!) : null;
+  late final CloudStack ?sky_condition = _parseCloudStack(data[MetarTafRawElement.clouds.name]);
   /// Horizontal visibility
-  late final Visibility ?visibility = (() {
-    if (data[MetarRawElement.visibility.name] != null) {
-      return Visibility.parse(data[MetarRawElement.visibility.name]!);
-    } else if (this.changeIndicator == ChangeIndicator.TAF) {
-      // default on TAF beginning if no value is given
-      return Visibility(6.0, DistanceUnit.SM, true);
-    } else if (sky_condition != null && sky_condition!.length > 0 && sky_condition!.first.coverage == CloudCoverage.CAVOK) {
-      // if CAVOK set to P6SM
-       return Visibility(6.0, DistanceUnit.SM, true);
-    }
-    return null;
-  })();
+  late final Visibility ?visibility =  _parseVisibility(data[MetarTafRawElement.visibility.name]);
 
    /// raw String build from parsed parts
   late final String rawPart = data.entries
@@ -110,34 +101,32 @@ class ForecastRaw implements FlightCategoryRelated {
     return {};
   }
 
-  static List<DateTime> _parseValidTimes(String endurance) {
-    // Assuming the format is "ddhh/ddhh"
-    final now = DateTime.now().toUtc();
-
-    final fromDay = int.parse(endurance.substring(0, 2));
-    final fromHour = int.parse(endurance.substring(2, 4));
-    final toDay = int.parse(endurance.substring(5, 7));
-    final toHour = int.parse(endurance.substring(7, 9));
-
-    final validTimeFrom = DateTime.utc(now.year, now.month, fromDay, fromHour);
-    final validTimeTo = DateTime.utc(now.year, now.month, toDay, toHour);
-
-    return [validTimeFrom, validTimeTo];
+  /// parse visibilty
+  Visibility? _parseVisibility(String? raw) {
+    if  (raw == "////")  {
+      return null;
+    } else if (raw != null) {
+      return Visibility.parse(raw);
+    } else if (this.changeIndicator == ChangeIndicator.TAF) {
+      // default on TAF beginning if no value is given
+      return Visibility(6.0, DistanceUnit.SM, true);
+    } else if (sky_condition != null && sky_condition!.length > 0 && sky_condition!.first.coverage == CloudCoverage.CAVOK) {
+      // if CAVOK set to P6SM
+      return Visibility(6.0, DistanceUnit.SM, true);
+    }
+    return null;
   }
 
-  static DateTime _parseValidFrom(String time) {
-    // Assuming the format is "ddhhmm"
-    final now = DateTime.now().toUtc();
-
-    final fromDay = int.parse(time.substring(0, 2));
-    final fromHour = int.parse(time.substring(2, 4));
-    final fromMin = int.parse(time.substring(4, 6));
-
-    final validTimeFrom = DateTime.utc(now.year, now.month, fromDay, fromHour, fromMin);
-
-
-    return validTimeFrom;
+  CloudStack? _parseCloudStack(String? raw) {
+    if (raw != null) {
+      return CloudStack.fromRaw(raw);
+    } else if (this.changeIndicator == ChangeIndicator.TAF) {
+    // default on TAF beginning if no value is given
+       return CloudStack.fromRaw(CloudCoverage.SKC.name);
+    }
+    return null;
   }
+
   /// Flightcategory related
   /// base AGL of lowest significant cloud in feet
   late final int? lowestSignificantCloudBase = this.sky_condition?.lowestSignificantCloudBase??null;

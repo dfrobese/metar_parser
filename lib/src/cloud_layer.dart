@@ -11,7 +11,6 @@ import 'package:xml/xml.dart';
 
 class CloudLayer {
 
-
   CloudLayer._(this.coverage, this.baseAGL);
 
   /// Create object from XML attributes

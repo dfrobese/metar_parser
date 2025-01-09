@@ -3,8 +3,6 @@ import 'package:metar_parser_dart/src/present_weather.dart';
 import 'package:metar_parser_dart/src/units/distance_unit.dart';
 import 'package:metar_parser_dart/src/visibility.dart';
 import 'package:metar_parser_dart/src/wind.dart';
-import 'package:metar_parser_dart/src/raw_parser/forecast_raw.dart';
-import 'package:metar_parser_dart/src/raw_parser/taf_raw.dart';
 import 'package:xml/xml.dart';
 
 import '../../metar_parser_dart.dart';
@@ -27,7 +25,6 @@ class ForecastTDS implements FlightCategoryRelated {
   final ChangeIndicator changeIndicator;
   final int probability;
   final XmlElement fcstElement;
-  final ForecastRaw? forecastFromRaw;
 
   ForecastTDS({
     required this.fcstTimeFrom,
@@ -35,15 +32,14 @@ class ForecastTDS implements FlightCategoryRelated {
     required this.fcstElement,
     required this.changeIndicator,
     required this.probability,
-    required this.forecastFromRaw
   });
 
-  factory ForecastTDS.fromXml(XmlElement xml, TafRaw rawTaf) {
+  /// Create object from TDS XML element
+  factory ForecastTDS.fromXml(XmlElement xml) {
     final fcstTimeFrom = DateTime.parse(xml.getElement('fcst_time_from')?.innerText ?? DateTime.now().toString());
     final fcstTimeTo = DateTime.parse(xml.getElement('fcst_time_to')?.innerText ?? DateTime.now().toString());
     final probability = int.tryParse(xml.getElement('probability')?.innerText ?? '100') ?? 100;
     final changeIndicator = ChangeIndicator.parse(xml.getElement('change_indicator')?.innerText ?? 'TAF');
-    final rawForecast = rawTaf.getBy(changeIndicator, fcstTimeFrom, fcstTimeTo);
 
     return ForecastTDS(
       fcstTimeFrom: fcstTimeFrom,
@@ -51,7 +47,6 @@ class ForecastTDS implements FlightCategoryRelated {
       fcstElement: xml,
       probability: probability,
       changeIndicator: changeIndicator,
-      forecastFromRaw: rawForecast
     );
   }
 
@@ -70,13 +65,18 @@ class ForecastTDS implements FlightCategoryRelated {
   /// tempertures
   late final double temp_c = double.parse(fcstElement.getElement('temp_c')?.innerText ?? "0");
   late final double dewpoint_c = double.parse(fcstElement.getElement('dewpoint_c')?.innerText ?? "0");
-  /// internal visibility string
-  late final String? _visibilityStr = fcstElement.getElement('visibility_statute_mi')?.innerText;
   /// visibility status miles
-  late final Visibility? visibility = (() {
-    if (_visibilityStr != null) {
+  late final Visibility? visibility = _parseVisibility(fcstElement.getElement('visibility_statute_mi')?.innerText);
+  /// lowest visibility in miles
+  late final double? lowestVisibility = visibility?.minInMiles;
+  /// preset
+  late FlightCategory flightCategory = FlightCategory.calc(this);
+
+  /// parse visibility string and return an object
+  Visibility? _parseVisibility(String? visibilityStr) {
+    if (visibilityStr != null) {
       // if an string exists, parse it
-      var match = RegExp( r'(?<miles>\d{1,2}(\.\d{1,2})?)(?<greater>\+)?' ).firstMatch(_visibilityStr!);
+      var match = RegExp( r'(?<miles>\d{1,2}(\.\d{1,2})?)(?<greater>\+)?' ).firstMatch(visibilityStr!);
       if (match != null && match.namedGroup('miles') != null) {
         final value = double.parse(match.namedGroup('miles')!);
         final greater = match.namedGroup('greater') != null;
@@ -87,9 +87,5 @@ class ForecastTDS implements FlightCategoryRelated {
       return Visibility(6.0, DistanceUnit.SM, true);
     }
     return null;
-  })();
-  /// lowest visibility in miles
-  late final double? lowestVisibility = visibility?.minInMiles;
-  /// preset
-  late FlightCategory flightCategory = FlightCategory.calc(this);
+  }
 }

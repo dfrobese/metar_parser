@@ -6,7 +6,7 @@ import 'dart:developer' as developer;
 
 import '../units/velocity_unit.dart';
 
-enum MetarRawElement {
+enum MetarTafRawElement {
   typeMetar,
   typeTaf,
   station,
@@ -20,7 +20,8 @@ enum MetarRawElement {
   visibility,
   rvr,
   weatherTaf,
-  weather,
+  weatherMetar,
+  _weather,
   clouds,
   cloudsChange,
   windSheer,
@@ -48,27 +49,30 @@ enum MetarRawElement {
       case endurance:
         return r'(\d{2}\d{2})\/(\d{2}\d{2})\s';
       case mode:
-        return r'(COR|AUTO|NIL|CNL|AMD)';
+        return r'(COR|AUTO|NIL|CNL|AMD|CCA)';
       case windVaries:
-        return r'(\d{3})V(\d{3})';
+        return r'(\d{3}|\/{3})V(\d{3}|\/{3})';
       case windGusts: // directional wind with gusts
-        return "((\\d{3})|VRB)(\\d{1,3})(G\\d{2})?(${VelocityUnit.regStr})";
+        return "((\\/{3}|\\d{3})|VRB)(\\/{2}|\\d{1,3})(G\\d{2})?(${VelocityUnit.regStr})";
       case windChange: // Taf wind change
-        return "((WND\\s)?(${MetarRawElement.windGusts.regExpString}|${MetarRawElement.windVaries.regExpString})(\\sAFT\\s\\d{4}\\s)?(ROTOR\\sCONDS\\sEXIST)?)";
+        return "((WND\\s)?(${MetarTafRawElement.windGusts.regExpString}|${MetarTafRawElement.windVaries.regExpString})(\\sAFT\\s\\d{4}\\s)?(ROTOR\\sCONDS\\sEXIST)?)";
       case windsGrid:
         return r'(ALL\sWINDS\sGRID)';
       case visibility: // horizontal visibility
-        return r'(?:(P?\d{1,2}|((\d\s)?\d\/\d))SM)|(?:(\d{4}\s){1,2})';
+        return r'(?:\/{4})|(?:([PM]?(\d{1,2}\s?|((\d\s)?\d\/\d{1,2})))SM)|(?:([PM]?\d{4}([NESW]{1,2})?\s){1,2})';
       case rvr: // runway visbility range
-        return "(R\\d{2}(\\w)?\\/([A-Z])?\\d{4}(V\\d{4})?(${RVRTrend.regStr})\\s)+";
-      case weather: // possible weather coding
+         return  r'(R[0-9]{2}[LRC]?((\/P?[0-9]{4}(?:V(P?)[0-9]{4})?(?:FT)?(?:\/?[UDN])?)|\/{5})\s)+';
+       //  return "(R\\d{2}(\\w)?\\/([A-Z])?\\d{4}(V\\d{4})?(${RVRTrend.regStr})?\\s)+";
+      case _weather: // possible weather coding
         return "(?:((\\+|-|VC|RE)?(${PresentWeather.descriptorRegStr})?(((${PresentWeather.precipitationRegStr})|(${PresentWeather.obscurationRegStr})|(${PresentWeather.otherReStr})){1,3}))\\s)+";
+      case weatherMetar: // TAF wx is NSW possible
+        return  "((\\/){2}|(${_weather.regExpString}))";
       case weatherTaf: // TAF wx is NSW possible
-        return "(NSW|(${weather.regExpString}))";
-      case clouds: // cloud coverage
-        return "((${CloudCoverage.regSpecStr})|((((${CloudCoverage.regCloudStr})(\\d{3}|\\/{3})(CB|TCU)?)\\s)+))";
-      case cloudsChange: // cloud coverage TAF on change
-        return "((${MetarRawElement.clouds.regExpString})(AFT\\s\\d{4}))";
+        return "(NSW|(${_weather.regExpString}))";
+      case clouds: // cloud coverage for Metar and Taf
+        return "((${CloudCoverage.regSpecStr})|((((${CloudCoverage.regCloudStr})(\\d{3}|\\/{3})(\\/{3}|CB|TCU)?)\\s)+))";
+      case cloudsChange: // cloud coverage TAF as change only
+        return "((${MetarTafRawElement.clouds.regExpString})(AFT\\s\\d{4}))";
       case windSheer: // wind sheer
         return r'(WS((\d{3}\/\d{5}KT)|CONDS))';
       case icingTurboGroup: // TAF icing and turbolence items, starts with 5 or 6, can be multiple
@@ -82,7 +86,7 @@ enum MetarRawElement {
       case frictionState: // ground friction
         return r'(FS\d{5})';
       case changeMetar: // change block for a Metar at the tail
-        return "(NOSIG|((BECMG|TEMPO)\\s(?:${MetarRawElement.windChange.regExpString}\\s?)?(?:${MetarRawElement.visibility.regExpString}\\s?)?(?:${MetarRawElement.weather.regExpString})?(?:${MetarRawElement.clouds.regExpString})?))";
+        return "(NOSIG|((BECMG|TEMPO)\\s(?:${MetarTafRawElement.windChange.regExpString}\\s?)?(?:${MetarTafRawElement.visibility.regExpString}\\s?)?(?:${MetarTafRawElement._weather.regExpString})?(?:${MetarTafRawElement.clouds.regExpString})?))";
       case change_indicator: // change indicator for next group
         return r'((PROB\d{2}\sTEMPO)|(PROB\d{2}|BECMG|TEMPO|INTER|FM\d{6}))';
       case remark: // remark section/^
@@ -103,7 +107,7 @@ enum MetarRawElement {
     windVaries,
     visibility,
     rvr,
-    weather,
+    weatherMetar,
     clouds,
     temperature,
     altimeter,
@@ -144,27 +148,11 @@ enum MetarRawElement {
 }
 
 class MetarTafRawParser {
-  /// Parese a raw Metar text and give back a map of items found
-  static Map<String, String?> parseMetarRawText(String metar) {
-    Map<String, String?> parsedMetar = {};
-    String remaining = metar + "\n"; // Add CR als end marker
-
-    for (var element in MetarRawElement.metarSequence) {
-      final match = RegExp(element.regExpString).firstMatch(remaining);
-      if (match != null && match.start == 0) {
-        parsedMetar[element.name] = match.group(0)?.trim();
-        remaining =
-            remaining.substring(match.end).trimLeft(); // keep end marker
-      }
-    }
-    // Exit if no match is found in current remaining string
-    return parsedMetar;
-  }
 
   /// split a raw Taf string in segments
   static List<String> _segmentTaf(String taf) {
     // Define the regex to identify TAF change indicators
-    final regex = RegExp(MetarRawElement.change_indicator.regExpString, multiLine: true);
+    final regex = RegExp(MetarTafRawElement.change_indicator.regExpString, multiLine: true);
     final matches = regex.allMatches(taf).toList();
     final result = <String>[];
     var start = 0;
@@ -185,7 +173,7 @@ class MetarTafRawParser {
 // start sequence
     Map<String, String?> parsedTafStart = {"raw": taf.trim()};
 // loop over start sequence
-    for (var element in MetarRawElement.tafStartSequence) {
+    for (var element in MetarTafRawElement.tafStartSequence) {
       final match = RegExp(element.regExpString).firstMatch(remaining);
       if (match != null && match.start == 0 && match[0] != null ) {
         final item = match[0]!.trim();
@@ -210,7 +198,7 @@ class MetarTafRawParser {
 // change sequence
     Map<String, String?> parsedTafChange = {"raw": taf.trim()};
     // loop over the sequence
-    for (var element in MetarRawElement.tafChangeSequence) {
+    for (var element in MetarTafRawElement.tafChangeSequence) {
       final match = RegExp(element.regExpString).firstMatch(remaining);
       if (match != null && match.start == 0 && match[0] != null ) {
         final item = match[0]!.trim();

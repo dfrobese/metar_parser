@@ -54,17 +54,14 @@ class TafTDS implements TDSElement {
   /// list of forecasts sorted by time
   late final List<ForecastTDS>forecasts = _buildForecasts();
   /// taf objects parsed from raw text
-  late final TafRaw _tafFromRaw = ((){
-     final mapFromRaw = MetarTafRawParser.parseTafRawText(rawText);
-     return TafRaw.fromMap(mapFromRaw);
-   })();
+  late final TafRaw _tafFromRaw = TafRaw.parse(rawText);
   /// GPS coordinates of station
-  late final Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
+  late final Coordinate coordinate = Coordinate(latitude: latitude, longitude: longitude);
 
   /// Build forcecast from TDS and find the matching raw segment
   List<ForecastTDS> _buildForecasts() {
     // create Taf from raw
-    final tafTDS = tafElement.findElements('forecast').map((e) => ForecastTDS.fromXml(e, _tafFromRaw)).toList();
+    final tafTDS = tafElement.findElements('forecast').map((e) => ForecastTDS.fromXml(e)).toList();
     // sort by time and changeindicator
     tafTDS.sort((a, b) {
       if (a.changeIndicator == ChangeIndicator.TAF) {
@@ -77,16 +74,13 @@ class TafTDS implements TDSElement {
       if (result == 0) {
         result = -(a.fcstTimeTo.compareTo(b.fcstTimeTo));
       }
-
-
       return result;
     });
     //
     FlightCategory.calculateFlightCategories(tafTDS);
     return tafTDS;
   }
-  /// formated text
-  late final String rawFormatedText = forecasts.map((e) => e.forecastFromRaw?.rawPart).join("\n");
+
 }
 
 
