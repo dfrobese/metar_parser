@@ -37,6 +37,7 @@ class TafRaw {
     return TafRaw._fromMap(mapFromRaw);
   }
 
+
   /// raw taf of this parts
   late final String rawPart = data.map((e) => e.values.join(" ").trim()).join(' ');
 
