@@ -14,8 +14,8 @@ final metarProvider = FutureProvider<Map<String, MetarTDS>>((ref) async {
   request = TDSRequest(TDSRequestType.metar);
 
   var content = await request.readZippedFile();
-  final file = content.toString();
-  if (file.length < 100) {
+  var file;
+  if (content != null && (file = content.toString()).length < 100) {
     developer.log('ERROR file not found');
     throw new TDSFetchDataException("An error occured, file not found");
   }

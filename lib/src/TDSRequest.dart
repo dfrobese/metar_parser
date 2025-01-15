@@ -5,7 +5,7 @@ import 'package:archive/archive_io.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/tds_parser/station_tds.dart';
 import 'package:xml/xml.dart';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 abstract  class TDSElement {
   String get station_id;
@@ -89,7 +89,7 @@ class TDSRequest {
   }
 
   /// read file based Metar/Taf/Station information with all entries
-  Future<String> readZippedFile() async {
+  Future<String?> readZippedFile() async {
     String link = type.cachedPath + ".gz";
     try {
       var bytes;
@@ -97,12 +97,19 @@ class TDSRequest {
       Response response = await get(Uri.parse(link));
       bytes = response.bodyBytes.toList();
       // unzip file
-      final decoder = GZipDecoder();
+      var decoder;
+      if (kIsWeb) {
+        // Handle web-specific logic
+        decoder = GZipDecoderWeb();
+      } else {
+        decoder = GZipDecoder();
+      }
       final result = decoder.decodeBytes(bytes);
       String unzipped = utf8.decode(result);
       return unzipped;
     } on Exception catch (e) {
-      return "Read zipped file from url $link failed";
+      developer.log("Read zipped file from url $link failed");
+      return null;
     }
   }
 
