@@ -6,6 +6,7 @@ import 'package:metar_parser_dart/src/raw_parser/metar_raw_parser.dart';
 import '../../metar_parser_dart.dart';
 import '../cloud_coverage.dart';
 import '../cloud_stack.dart';
+import '../rvr.dart';
 import '../tds_parser/forecast_tds.dart';
 import '../present_weather.dart';
 import '../units/distance_unit.dart';
@@ -134,5 +135,8 @@ class ForecastRaw implements FlightCategoryRelated {
   late final double? lowestVisibility =  this.visibility?.minInMiles ??null;
   /// flight category, preset is calcutalion based on current values
   late FlightCategory flightCategory = FlightCategory.calc(this);
+  ///  RVR
+  late final List<RVR?>? rvr = RVR.parseRVR(data[MetarTafRawElement.rvr.name]);
+
 }
 

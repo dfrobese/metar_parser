@@ -1,5 +1,6 @@
 
 import 'package:metar_parser_dart/src/cloud_coverage.dart';
+import 'package:metar_parser_dart/src/rvr.dart';
 import '../../metar_parser_dart.dart';
 import '../cloud_stack.dart';
 import '../present_weather.dart';
@@ -65,7 +66,8 @@ class MetarRaw implements FlightCategoryRelated {
   late final CloudStack ?sky_condition = CloudStack.fromRaw(data[MetarTafRawElement.clouds.name]??CloudCoverage.SKC.name); // parsed value or SKC as default
   /// Horizontal visibility
   late final Visibility ?visibility =  _parseVisibility(data[MetarTafRawElement.visibility.name]);
-
+  ///  RVR
+  late final List<RVR?>? rvr = RVR.parseRVR(data[MetarTafRawElement.rvr.name]);
   /// parse visibilty
   Visibility? _parseVisibility(String? raw) {
     if  (raw == "////")  {

@@ -55,6 +55,8 @@ void main() {
     expect(lfbd.visibility!.minVisibility == 2500, true);
     // check flight category
     expect(lfbd.flightCategory == FlightCategory.LIFR, true);
+    // check rvr
+    expect(lfbd.rvr?.first?.runway == "23", true);
 
     // EDDV 151420Z AUTO 26005KT 9999 OVC022 09/06 Q1025 NOSIG
     final eddv = MetarRaw.parse(
@@ -80,6 +82,7 @@ void main() {
     expect(eddv.visibility!.minVisibility == 9999, true);
     // check flight category
     expect(eddv.flightCategory == FlightCategory.MVFR, true);
+
   });
 
   test('Full Metar test', () async {
