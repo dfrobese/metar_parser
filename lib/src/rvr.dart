@@ -1,5 +1,4 @@
 // Weight enumeration with corresponding descriptions
-import 'dart:ffi';
 
 enum RVRWeight {
   Less("<=", "⋜"),
