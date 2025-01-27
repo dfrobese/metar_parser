@@ -90,6 +90,9 @@ class TDSRequest {
     } on FormatException {
       developer.log("Error: Bad response format on $link");
       return "";
+    } on Exception catch (e) {
+      developer.log("Error: Exception ${e.toString()}on $link");
+      return "null";
     }
   }
 
@@ -122,6 +125,9 @@ class TDSRequest {
       return null;
     } on FormatException {
       developer.log("Error: Bad response format on $link");
+      return null;
+    } on Exception catch (e) {
+      developer.log("Error: Exception ${e.toString()} on $link");
       return null;
     }
   }
