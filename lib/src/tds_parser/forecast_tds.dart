@@ -74,7 +74,7 @@ class ForecastTDS implements FlightCategoryRelated {
 
   /// parse visibility string and return an object
   Visibility? _parseVisibility(String? visibilityStr) {
-    if (visibilityStr != null) {
+    if (null != visibilityStr) {
       // if an string exists, parse it
       var match = RegExp( r'(?<miles>\d{1,2}(\.\d{1,2})?)(?<greater>\+)?' ).firstMatch(visibilityStr!);
       if (match != null && match.namedGroup('miles') != null) {

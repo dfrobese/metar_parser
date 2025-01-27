@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'dart:io';
 import 'package:http/http.dart';
 import 'package:archive/archive_io.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
@@ -7,17 +8,18 @@ import 'package:metar_parser_dart/src/tds_parser/station_tds.dart';
 import 'package:xml/xml.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-abstract  class TDSElement {
+abstract class TDSElement {
   String get station_id;
+
   double get latitude; // 45.7</latitude>d
   double get longitude; // >-92.95</longitude>
 }
-
 
 enum TDSRequestType {
   metar,
   taf,
   station;
+
 //  final String dataServerPath = "https://aviationweather.gov/adds/dataserver_current/";
 //  final String dataServerPath = "https://aviationweather-bldr.ncep.noaa.gov/adds/dataserver_current/current/";
   final String dataServerPath = "https://aviationweather.gov/data/cache/";
@@ -31,7 +33,6 @@ enum TDSRequestType {
         return "Station";
     }
   }
-
 
   Type get type {
     switch (this) {
@@ -65,12 +66,9 @@ enum TDSRequestType {
         return dataServerPath + 'stations.cache.xml';
     }
   }
-
-
 }
 
 class TDSRequest {
-
   final TDSRequestType type;
 
   TDSRequest(this.type);
@@ -80,11 +78,18 @@ class TDSRequest {
     String link = type.cachedPath;
     try {
       Response response = await get(Uri.parse(link));
+      if (response.statusCode != 200)
+        throw HttpException('${response.statusCode}');
       return response.body;
-    } on Exception catch(e) {
-      final msg = "Read file from url $link failed";
-      developer.log('ERROR $msg');
-      return msg;
+    } on SocketException {
+      developer.log("Error: No Internet connection on $link");
+      return "";
+    } on HttpException {
+      developer.log("Error: Couldn't find the file $link");
+      return "";
+    } on FormatException {
+      developer.log("Error: Bad response format on $link");
+      return "";
     }
   }
 
@@ -95,6 +100,8 @@ class TDSRequest {
       var bytes;
       // read bytes
       Response response = await get(Uri.parse(link));
+      if (response.statusCode != 200)
+        throw HttpException('${response.statusCode}');
       bytes = response.bodyBytes.toList();
       // unzip file
       var decoder;
@@ -107,8 +114,14 @@ class TDSRequest {
       final result = decoder.decodeBytes(bytes);
       String unzipped = utf8.decode(result);
       return unzipped;
-    } on Exception catch (e) {
-      developer.log("Read zipped file from url $link failed");
+    } on SocketException {
+      developer.log("Error: No Internet connection on $link");
+      return null;
+    } on HttpException {
+      developer.log("Error: Couldn't find the zip file $link");
+      return null;
+    } on FormatException {
+      developer.log("Error: Bad response format on $link");
       return null;
     }
   }
@@ -122,16 +135,15 @@ class TDSRequest {
     final elements = document.findAllElements(type.token);
     var map = Map<String, TDSElement>.fromIterable(elements,
         key: (item) => item.getElement('station_id')?.text!,
-        value: (item) => type.fromElement<TDSElement>(item) );
+        value: (item) => type.fromElement<TDSElement>(item));
 
     filterFalseEntries(map);
     return map;
   }
 
-  filterFalseEntries(Map<String, TDSElement> elements)  {
+  filterFalseEntries(Map<String, TDSElement> elements) {
     elements.removeWhere((key, value) {
-      return (value.latitude < -90 || value.latitude > 90);});
+      return (value.latitude < -90 || value.latitude > 90);
+    });
   }
-
 }
-
