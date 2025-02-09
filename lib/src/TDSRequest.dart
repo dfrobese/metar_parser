@@ -78,28 +78,14 @@ class TDSRequest {
     try {
       Response response = await get(Uri.parse(link));
       if (response.statusCode != 200)
-        throw HttpException('${response.statusCode}');
+        throw Exception('${response.statusCode}');
       return response.body;
-    } on SocketException {
+    } on Exception {
       developer.log("Error: No Internet connection on $link");
       return "";
-    } on HttpException {
-      developer.log("Error: Couldn't find the file $link");
-      return "";
-    } on FormatException {
-      developer.log("Error: Bad response format on $link");
-      return "";
-    } on Exception catch (e) {
-      developer.log("Error: Exception ${e.toString()}on $link");
-      return "null";
     }
   }
 
-
-
-  Uint8List decodeGzip(Uint8List compressedData) {
-    return Uint8List.fromList(zlib.decode(compressedData));
-  }
 
   /// read file based Metar/Taf/Station information with all entries
   Future<String?> readZippedFile() async {
@@ -109,31 +95,22 @@ class TDSRequest {
       // read bytes
       Response response = await get(Uri.parse(link));
       if (response.statusCode != 200)
-        throw HttpException('${response.statusCode}');
+        throw TDSFetchDataException('${response.statusCode}');
       bytes = response.bodyBytes;
       // unzip bytes
-      Uint8List decompressedData = decodeGzip(bytes);
+      Uint8List decompressedData = Uint8List.fromList(zlib.decode(bytes));
       String result = utf8.decode(decompressedData); // Convert to readable text
 
       return result;
-    } on SocketException {
+    } on Exception {
       developer.log("Error: No Internet connection on $link");
-      return null;
-    } on HttpException {
-      developer.log("Error: Couldn't find the zip file $link");
-      return null;
-    } on FormatException {
-      developer.log("Error: Bad response format on $link");
-      return null;
-    } on Exception catch (e) {
-      developer.log("Error: Exception ${e.toString()} on $link");
       return null;
     }
   }
 
   Map<String, TDSElement> parse(String body) {
     if (body.length < 1) {
-      throw TDSFetchDataException("No connection");
+      throw TDSFetchDataException("No http connection to NOAA TDS");
     }
     var document = XmlDocument.parse(body);
     var root = document.getElement('data');
