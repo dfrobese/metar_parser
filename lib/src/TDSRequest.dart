@@ -2,11 +2,10 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:http/http.dart';
-import 'package:archive/archive_io.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/tds_parser/station_tds.dart';
 import 'package:xml/xml.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:typed_data';
 
 abstract class TDSElement {
   String get station_id;
@@ -96,6 +95,12 @@ class TDSRequest {
     }
   }
 
+
+
+  Uint8List decodeGzip(Uint8List compressedData) {
+    return Uint8List.fromList(zlib.decode(compressedData));
+  }
+
   /// read file based Metar/Taf/Station information with all entries
   Future<String?> readZippedFile() async {
     String link = type.cachedPath + ".gz";
@@ -105,18 +110,12 @@ class TDSRequest {
       Response response = await get(Uri.parse(link));
       if (response.statusCode != 200)
         throw HttpException('${response.statusCode}');
-      bytes = response.bodyBytes.toList();
-      // unzip file
-      var decoder;
-      if (kIsWeb) {
-        // Handle web-specific logic
-        decoder = GZipDecoderWeb();
-      } else {
-        decoder = GZipDecoder();
-      }
-      final result = decoder.decodeBytes(bytes);
-      String unzipped = utf8.decode(result);
-      return unzipped;
+      bytes = response.bodyBytes;
+      // unzip bytes
+      Uint8List decompressedData = decodeGzip(bytes);
+      String result = utf8.decode(decompressedData); // Convert to readable text
+
+      return result;
     } on SocketException {
       developer.log("Error: No Internet connection on $link");
       return null;

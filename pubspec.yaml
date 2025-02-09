@@ -12,7 +12,6 @@ dependencies:
   xml:  ^6.5.0
   country: ^4.1.9
   units_converter: ^2.1.1
-  archive: ^4.0.2
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.6.1
   http: ^1.2.2
