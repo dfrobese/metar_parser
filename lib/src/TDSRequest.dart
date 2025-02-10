@@ -1,15 +1,15 @@
-import 'dart:convert';
+
 import 'dart:developer' as developer;
-import 'dart:io';
 import 'package:http/http.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/tds_parser/station_tds.dart';
 import 'package:xml/xml.dart';
-import 'dart:typed_data';
+// Conditional imports
+import './extension/decompress_native.dart'
+  if (dart.library.html) './extension/decompress_web.dart';
 
 abstract class TDSElement {
   String get station_id;
-
   double get latitude; // 45.7</latitude>d
   double get longitude; // >-92.95</longitude>
 }
@@ -98,8 +98,7 @@ class TDSRequest {
         throw TDSFetchDataException('${response.statusCode}');
       bytes = response.bodyBytes;
       // unzip bytes
-      Uint8List decompressedData = Uint8List.fromList(zlib.decode(bytes));
-      String result = utf8.decode(decompressedData); // Convert to readable text
+      String result = decompressZlib(bytes);
 
       return result;
     } on Exception {
