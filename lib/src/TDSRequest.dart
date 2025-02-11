@@ -24,7 +24,7 @@ enum TDSRequestType {
 //  final String dataServerPath = "https://aviationweather-bldr.ncep.noaa.gov/adds/dataserver_current/current/";
   String get dataServerPath {
     if (kIsWeb) {
-      return "https://corsproxy.io/?https://aviationweather.gov/data/cache/";
+      return "https://corsproxy.io/?url=https://aviationweather.gov/data/cache/";
     }
     return "https://aviationweather.gov/data/cache/";
   }
