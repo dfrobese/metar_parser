@@ -1,8 +1,7 @@
-import 'dart:developer' as developer;
+
 import 'package:country/country.dart';
 import 'package:metar_parser_dart/src/tds_parser/forecast_tds.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
-import 'package:metar_parser_dart/src/raw_parser/taf_raw.dart';
 import 'package:xml/xml.dart';
 import '../../metar_parser_dart.dart';
 
@@ -51,7 +50,7 @@ class TafTDS implements TDSElement {
   /// list of forecasts sorted by time
   late final List<ForecastTDS>forecasts = _buildForecasts();
   /// taf objects parsed from raw text
-  late final TafRaw _tafFromRaw = TafRaw.parse(rawText);
+  ///late final TafRaw _tafFromRaw = TafRaw.parse(rawText);
   /// GPS coordinates of station
   late final Coordinate coordinate = Coordinate(latitude: latitude, longitude: longitude);
 

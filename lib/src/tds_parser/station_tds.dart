@@ -8,17 +8,17 @@ class StationTDS implements TDSElement {
     StationTDS._(this.station_id, this.wmo_id, this.latitude, this.longitude, this.elevation_m, this.site, this.state, this.country);
 
     factory StationTDS.fromElement(XmlElement element) {
-        var wmoId = element.getElement('wmo_id')?.text ?? "";
-        var id = element.getElement('station_id')?.text ?? "";
-        var time = DateTime.parse(element.getElement('issue_time')?.text ?? DateTime.now().toString());
-        var latitude = double.parse(element.getElement('latitude')?.text ?? "0") ;
+        var wmoId = element.getElement('wmo_id')?.innerText ?? "";
+        var id = element.getElement('station_id')?.innerText ?? "";
+        //var time = DateTime.parse(element.getElement('issue_time')?.text ?? DateTime.now().toString());
+        var latitude = double.parse(element.getElement('latitude')?.innerText ?? "0") ;
         // latitude = (latitude >= -90.0 && latitude <= 90.0) ? latitude : 0;
-        var longitude = double.parse(element.getElement('longitude')?.text ?? "0");
+        var longitude = double.parse(element.getElement('longitude')?.innerText ?? "0");
         // longitude = (longitude >= -180.0 && longitude <= 180.0) ? longitude : 0;
-        var elevationM = double.parse(element.getElement('elevation_m')?.text ?? "0");
-        var site = element.getElement('site')?.text ?? "";
-        var state = element.getElement('state')?.text ?? "";
-        var country = element.getElement('country')?.text ?? "";
+        var elevationM = double.parse(element.getElement('elevation_m')?.innerText ?? "0");
+        var site = element.getElement('site')?.innerText ?? "";
+        var state = element.getElement('state')?.innerText ?? "";
+        var country = element.getElement('country')?.innerText ?? "";
 
         return StationTDS._(id, wmoId, latitude, longitude, elevationM, site, state, country);
     }

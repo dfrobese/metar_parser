@@ -1,5 +1,4 @@
 
-import 'dart:developer' as developer;
 import 'package:metar_parser_dart/src/cloud_stack.dart';
 import 'package:metar_parser_dart/src/flight_category.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';

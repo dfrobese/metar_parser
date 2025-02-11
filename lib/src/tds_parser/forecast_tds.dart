@@ -76,7 +76,7 @@ class ForecastTDS implements FlightCategoryRelated {
   Visibility? _parseVisibility(String? visibilityStr) {
     if (null != visibilityStr) {
       // if an string exists, parse it
-      var match = RegExp( r'(?<miles>\d{1,2}(\.\d{1,2})?)(?<greater>\+)?' ).firstMatch(visibilityStr!);
+      var match = RegExp( r'(?<miles>\d{1,2}(\.\d{1,2})?)(?<greater>\+)?' ).firstMatch(visibilityStr);
       if (match != null && match.namedGroup('miles') != null) {
         final value = double.parse(match.namedGroup('miles')!);
         final greater = match.namedGroup('greater') != null;

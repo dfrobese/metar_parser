@@ -109,10 +109,13 @@ class TDSRequest {
 
   Map<String, TDSElement> parse(String body) {
     if (body.length < 1) {
+      developer.log("Error: no zipped metar fetched");
       throw TDSFetchDataException("No http connection to NOAA TDS");
     }
     var document = XmlDocument.parse(body);
     var root = document.getElement('data');
+    assert(root == null);
+    // map all stations
     final elements = document.findAllElements(type.token);
     var map = Map<String, TDSElement>.fromIterable(elements,
         key: (item) => item.getElement('station_id')?.text!,

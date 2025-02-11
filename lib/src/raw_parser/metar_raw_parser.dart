@@ -1,9 +1,6 @@
 import 'package:metar_parser_dart/src/present_weather.dart';
-import 'package:metar_parser_dart/src/wind.dart';
-import 'package:metar_parser_dart/src/rvr.dart';
 import '../cloud_coverage.dart';
 import 'dart:developer' as developer;
-
 import '../units/velocity_unit.dart';
 
 enum MetarTafRawElement {
@@ -93,9 +90,7 @@ enum MetarTafRawElement {
         return r'((RMK)?.+)';
       case correctionAt: // TAF correction time
         return r'((COR|AMD)\s\d{4})';
-        break;
     }
-    return "";
   }
 
   static const metarSequence = [
