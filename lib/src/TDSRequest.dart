@@ -4,6 +4,7 @@ import 'package:http/http.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/tds_parser/station_tds.dart';
 import 'package:xml/xml.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 // Conditional imports
 import './extension/decompress_native.dart'
   if (dart.library.html) './extension/decompress_web.dart';
@@ -21,7 +22,12 @@ enum TDSRequestType {
 
 //  final String dataServerPath = "https://aviationweather.gov/adds/dataserver_current/";
 //  final String dataServerPath = "https://aviationweather-bldr.ncep.noaa.gov/adds/dataserver_current/current/";
-  final String dataServerPath = "https://aviationweather.gov/data/cache/";
+  String get dataServerPath {
+    if (kIsWeb) {
+      return "https://corsproxy.io/?https://aviationweather.gov/data/cache/";
+    }
+    return "https://aviationweather.gov/data/cache/";
+  }
 
   String get token {
     switch (this) {
