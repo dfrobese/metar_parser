@@ -5,6 +5,8 @@ import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/tds_parser/station_tds.dart';
 import 'package:xml/xml.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+
+
 // Conditional imports
 import './extension/decompress_native.dart'
   if (dart.library.html) './extension/decompress_web.dart';
@@ -22,13 +24,15 @@ enum TDSRequestType {
 
 //  final String dataServerPath = "https://aviationweather.gov/adds/dataserver_current/";
 //  final String dataServerPath = "https://aviationweather-bldr.ncep.noaa.gov/adds/dataserver_current/current/";
-  String get dataServerPath {
-    if (kIsWeb) {
-      return "https://corsproxy.io/?url=https://aviationweather.gov/data/cache/";
-    }
-    return "https://aviationweather.gov/data/cache/";
-  }
+ 
+ 
+  
 
+  /// Retrieves the token associated with the current request instance.
+  /// 
+  /// This token is typically used for metar or tafs
+  /// purposes in requests. Ensure that the token is securely managed
+  /// and not exposed in logs or error messages.
   String get token {
     switch (this) {
       case TDSRequestType.metar:
@@ -39,6 +43,11 @@ enum TDSRequestType {
     }
   }
 
+  /// Gets the type of the current request instance.
+  /// 
+  /// This property returns the specific type associated with the instance,
+  /// which can be used to identify or differentiate between various requests
+  /// within the context of the required data.
   Type get type {
     switch (this) {
       case TDSRequestType.metar:
@@ -61,18 +70,51 @@ enum TDSRequestType {
     }
   }
 
-  String get cachedPath {
+  /// Gets the cached File for the requested data instance.
+  /// 
+  /// This property retrieves a string representing the cached file
+  /// associated with the waether object. The exact behavior and format of
+  /// the cached path depend on the implementation details.
+  String get _cachedFileName {
     switch (this) {
       case TDSRequestType.metar:
-        return dataServerPath + "metars.cache.xml";
+        return  "metars.cache.xml";
       case TDSRequestType.taf:
-        return dataServerPath + "tafs.cache.xml";
+        return  "tafs.cache.xml";
       case TDSRequestType.station:
-        return dataServerPath + 'stations.cache.xml';
+        return 'stations.cache.xml';
+    }
+  }
+
+  /// Returns the [Uri] for cached files, optionally specifying if the files are zipped.
+  ///
+  /// [isZipped] determines whether the URI should point to zipped files (`true`)
+  /// or to unzipped files (`false`).
+  ///
+  /// Returns a [Uri] representing the location of the cached files.
+  Uri cachedFilesUri(bool isZipped) {
+    final fileName = isZipped ? '$_cachedFileName.gz' : _cachedFileName;
+     if (kIsWeb) {
+        // Runs on web: Proxy API call
+        return Uri(host:"/aviationweather", // see proxy config
+        path: '$fileName');
+    }
+    else {
+      // Runs on mobile or desktop: Direct API call
+
+      return Uri(
+        scheme: 'https',
+        host: 'aviationweather.gov',
+        path: '/data/cache/$fileName',
+        );
     }
   }
 }
 
+/// A class representing a TDS (Terminal Data Service) request.
+/// 
+/// This class is used to encapsulate the details and functionality
+/// required to create and manage requests to the TDS system.
 class TDSRequest {
   final TDSRequestType type;
 
@@ -80,9 +122,9 @@ class TDSRequest {
 
   /// read file based Metar/Taf/Station information with all entries
   Future<String> readFile() async {
-    String link = type.cachedPath;
+    Uri link = type.cachedFilesUri(false);
     try {
-      Response response = await get(Uri.parse(link));
+      Response response = await get(link);
       if (response.statusCode != 200)
         throw Exception('${response.statusCode}');
       return response.body;
@@ -95,11 +137,11 @@ class TDSRequest {
 
   /// read file based Metar/Taf/Station information with all entries
   Future<String?> readZippedFile() async {
-    String link = type.cachedPath + ".gz";
+    Uri link = type.cachedFilesUri(true);
     try {
       var bytes;
       // read bytes
-      Response response = await get(Uri.parse(link));
+      Response response = await get(link);
       if (response.statusCode != 200)
         throw TDSFetchDataException('${response.statusCode}');
       bytes = response.bodyBytes;
@@ -113,6 +155,13 @@ class TDSRequest {
     }
   }
 
+  /// Parses the given response body and converts it into a map of `TDSElement` objects.
+  ///
+  /// The keys in the returned map are strings representing specific identifiers,
+  /// and the values are `TDSElement` objects containing the parsed data.
+  ///
+  /// - Parameter body: The response body as a string to be parsed.
+  /// - Returns: A map where the keys are strings and the values are `TDSElement` objects.
   Map<String, TDSElement> parse(String body) {
     if (body.length < 1) {
       developer.log("Error: no zipped metar fetched");
@@ -131,6 +180,14 @@ class TDSRequest {
     return map;
   }
 
+  /// Filters out entries in the provided map where the condition evaluates to false.
+  ///
+  /// This method takes a map of string keys and `TDSElement` values, and removes
+  /// entries that do not meet a specific condition. The exact filtering logic
+  /// should be implemented within the method.
+  ///
+  /// - Parameter elements: A map of string keys to `TDSElement` values to be filtered.
+  /// - Returns: The filtered map with only the entries that meet the condition.
   filterFalseEntries(Map<String, TDSElement> elements) {
     elements.removeWhere((key, value) {
       return (value.latitude < -90 || value.latitude > 90);
