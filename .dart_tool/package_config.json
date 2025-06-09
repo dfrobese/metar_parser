@@ -549,9 +549,9 @@
     },
     {
       "name": "vector_math",
-      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.1.4",
+      "rootUri": "file:///C:/Users/frobe/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.2.0",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.1"
     },
     {
       "name": "vm_service",
@@ -609,8 +609,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.8.0-250.0.dev",
+  "generatorVersion": "3.9.0-211.0.dev",
   "flutterRoot": "file:///C:/flutter",
-  "flutterVersion": "3.31.0-1.0.pre.363",
+  "flutterVersion": "3.33.0-1.0.pre.417",
   "pubCache": "file:///C:/Users/frobe/AppData/Local/Pub/Cache"
 }

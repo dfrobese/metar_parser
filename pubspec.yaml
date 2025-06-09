@@ -30,4 +30,3 @@ dev_dependencies:
   test: ^1.25.8
 
 assets:
-    - assets/.env
