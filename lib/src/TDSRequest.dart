@@ -1,4 +1,3 @@
-
 import 'dart:developer' as developer;
 import 'package:http/http.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
@@ -22,11 +21,8 @@ enum TDSRequestType {
   taf,
   station;
 
-//  final String dataServerPath = "https://aviationweather.gov/adds/dataserver_current/";
+//  final String dataServerPath = "https://aviationweather.gov/data/cache/stations.cache.xml";
 //  final String dataServerPath = "https://aviationweather-bldr.ncep.noaa.gov/adds/dataserver_current/current/";
- 
- 
-  
 
   /// Retrieves the token associated with the current request instance.
   /// 
