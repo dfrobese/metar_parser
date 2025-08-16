@@ -90,20 +90,12 @@ enum TDSRequestType {
   /// Returns a [Uri] representing the location of the cached files.
   Uri cachedFilesUri(bool isZipped) {
     final fileName = isZipped ? '$_cachedFileName.gz' : _cachedFileName;
-     if (kIsWeb) {
-        // Runs on web: Proxy API call
-        return Uri(host:"/aviationweather", // see proxy config
-        path: '$fileName');
-    }
-    else {
-      // Runs on mobile or desktop: Direct API call
-
+    
       return Uri(
         scheme: 'https',
         host: 'aviationweather.gov',
         path: '/data/cache/$fileName',
         );
-    }
   }
 }
 
