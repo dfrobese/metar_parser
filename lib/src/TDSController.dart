@@ -3,8 +3,11 @@ import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:metar_parser_dart/src/extension/NotifyChanges.dart';
 
-
-
+/// Exception thrown when there is an error fetching data in the TDSController.
+/// 
+/// This exception can be used to indicate issues such as network failures,
+/// invalid responses, or other problems encountered while attempting to
+/// retrieve data from a source.
 class TDSFetchDataException implements Exception {
   final _message;
   TDSFetchDataException([this._message]);
@@ -15,14 +18,24 @@ class TDSFetchDataException implements Exception {
   }
 }
 
+/// A controller class for managing and notifying changes to a collection of [TDSElement]s.
+/// 
+/// Extends [NotifyChanges] to provide change notification functionality.
+/// 
+/// Type parameter [TDSElement] specifies the type of elements managed by this controller.
 class TDSController<TDSElement> extends NotifyChanges {
 
   final Map<String, TDSElement> tdsDict = Map();
 
   final TDSRequest request;
+  final String proxyHostName;
 
-  TDSController(TDSRequestType type) :
-    request = TDSRequest(type);
+  /// Constructs a [TDSController] with the specified [type] and optional [proxyHostName].
+  ///
+  /// [type] defines the type of TDS request to be handled.
+  /// [proxyHostName] is the hostname of the optional proxy server to be used. Defaults to empty string.
+  TDSController(TDSRequestType type, [this.proxyHostName = '']) :
+    request = TDSRequest(type, proxyHostName);
 
 
   /// Makes a full file request of all Metars
@@ -40,23 +53,60 @@ class TDSController<TDSElement> extends NotifyChanges {
     notifyListeners();
     return tdsDict;
   }
-
-
 }
 
+/// Controller class for handling operations related to [MetarTDS] objects.
+/// 
+/// Extends [TDSController] to provide specific functionality for METAR data.
+/// Use this controller to manage, parse, and interact with METAR records.
 class MetarController extends TDSController<MetarTDS>{
-  MetarController() : super(TDSRequestType.metar);
+  /// The hostname of the optional proxy server to be used for requests.
+  final String proxyHostName;
+
+  /// Constructs a [MetarController] with the specified [proxyHostName].
+  /// 
+  /// Initializes the controller by calling the superclass constructor with
+  /// [TDSRequestType.metar] and the provided [proxyHostName].
+  ///
+  /// [proxyHostName] is the hostname of the optional proxy server to be used for requests. Defaults to empty string.
+  MetarController({this.proxyHostName = ''}) : super(TDSRequestType.metar, proxyHostName);
 }
 
 
+
+/// A controller class for handling TAF (Terminal Aerodrome Forecast) data,
+/// extending the generic [TDSController] with [TafTDS] as the data source.
+/// 
+/// This class provides specialized logic and functionality for managing,
+/// parsing, and interacting with TAF-related data within the application.
 class TafController extends TDSController<TafTDS>{
-  TafController() : super(TDSRequestType.taf);
+  /// The hostname of the optional proxy server to be used for requests.
+  final String proxyHostName;
 
+  /// Creates a [TafController] instance with the specified [proxyHostName].
+  ///
+  /// Initializes the controller by calling the superclass constructor with
+  /// [TDSRequestType.taf] as the request type and the provided [proxyHostName].
+  ///
+  /// [proxyHostName] is the hostname of the optional proxy server to be used for requests. Defaults to empty string.
+  TafController({this.proxyHostName = ''}) : super(TDSRequestType.taf, proxyHostName);
 }
 
+/// A controller class for managing operations related to [StationTDS] entities.
+/// 
+/// Inherits from [TDSController] and provides specific functionality for
+/// handling station data within the application.
 class StationController extends TDSController<StationTDS>{
-  StationController() : super(TDSRequestType.station);
 
+  /// The hostname of the optional proxy server to be used for requests.
+  final String proxyHostName;
+
+  /// Creates a [StationController] instance with the specified [proxyHostName].
+  ///
+  /// Calls the superclass constructor with [TDSRequestType.station] and the given [proxyHostName].
+  ///
+  /// [proxyHostName] is the hostname of the optional proxy server to be used for requests. Defaults to empty string.
+  StationController({this.proxyHostName = ''}) : super(TDSRequestType.station, proxyHostName);
 }
 
 
