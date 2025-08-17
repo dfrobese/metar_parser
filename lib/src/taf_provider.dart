@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 
 
 /// A provider class for fetching TAF (Terminal Aerodrome Forecast) data.
@@ -38,8 +38,3 @@ class TafProvider {
   }
 }
 
-/// A Riverpod provider for fetching TAF data with a configurable proxy host name.
-final tafProvider = FutureProvider.family<Map<String, TafTDS>, String>((ref, proxyHostName) async {
-  final provider = TafProvider(proxyHostName: proxyHostName);
-  return await provider.fetchTaf();
-});

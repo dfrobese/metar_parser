@@ -13,8 +13,6 @@ dependencies:
   xml:  ^6.5.0
   country: ^4.1.9
   units_converter: ^2.1.1
-  flutter_riverpod: ^2.5.1
-  riverpod_annotation: ^2.6.1
   http: ^1.2.2
   intl: ^0.20.1
   foundation:
@@ -27,8 +25,6 @@ dev_dependencies:
     sdk: flutter
   build_runner: ^2.4.9
   custom_lint:
-  riverpod_generator: ^2.6.3
-  riverpod_lint: ^2.6.3
   test: ^1.25.8
 
 assets:

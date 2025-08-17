@@ -1,5 +1,4 @@
 import 'dart:developer' as developer;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
 
@@ -42,9 +41,4 @@ class MetarProvider {
   }
 }
 
-/// A Riverpod provider for fetching METAR data with a configurable proxy host name.
-final metarProvider = FutureProvider.family<Map<String, MetarTDS>, String>((ref, proxyHostName) async {
-  final provider = MetarProvider(proxyHostName: proxyHostName);
-  return await provider.fetchMetar();
-});
 

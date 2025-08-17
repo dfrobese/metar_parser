@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:metar_parser_dart/metar_parser_dart.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:metar_parser_dart/src/TDSRequest.dart';
 
 /// A provider class for fetching station data.
@@ -36,9 +36,3 @@ class StationProvider {
     return tdsDict;
   }
 }
-
-/// A Riverpod provider for fetching station data with a configurable proxy host name.
-final stationProvider = FutureProvider.family<Map<String, StationTDS>, String>((ref, proxyHostName) async {
-  final provider = StationProvider(proxyHostName: proxyHostName);
-  return await provider.fetchStation();
-});
