@@ -5,10 +5,9 @@ import 'package:metar_parser_dart/src/tds_parser/station_tds.dart';
 import 'package:xml/xml.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-
 // Conditional imports
 import './extension/decompress_native.dart'
-  if (dart.library.html) './extension/decompress_web.dart';
+    if (dart.library.html) './extension/decompress_web.dart';
 
 abstract class TDSElement {
   String get station_id;
@@ -23,9 +22,9 @@ enum TDSRequestType {
 
 //  final String dataServerPath = "https://aviationweather.gov/data/cache/stations.cache.xml";
 //  final String dataServerPath = "https://aviationweather-bldr.ncep.noaa.gov/adds/dataserver_current/current/";
- 
+
   /// Retrieves the token associated with the current request instance.
-  /// 
+  ///
   /// This token is typically used for metar or tafs
   /// purposes in requests. Ensure that the token is securely managed
   /// and not exposed in logs or error messages.
@@ -40,7 +39,7 @@ enum TDSRequestType {
   }
 
   /// Gets the type of the current request instance.
-  /// 
+  ///
   /// This property returns the specific type associated with the instance,
   /// which can be used to identify or differentiate between various requests
   /// within the context of the required data.
@@ -67,18 +66,29 @@ enum TDSRequestType {
   }
 
   /// Gets the cached File for the requested data instance.
-  /// 
+  ///
   /// This property retrieves a string representing the cached file
   /// associated with the waether object. The exact behavior and format of
   /// the cached path depend on the implementation details.
   String get _cachedFileName {
     switch (this) {
       case TDSRequestType.metar:
-        return  "metars.cache.xml";
+        return "metars.cache.xml";
       case TDSRequestType.taf:
-        return  "tafs.cache.xml";
+        return "tafs.cache.xml";
       case TDSRequestType.station:
         return 'stations.cache.xml';
+    }
+  }
+
+  String get _endpoint {
+    switch (this) {
+      case TDSRequestType.metar:
+        return "metars";
+      case TDSRequestType.taf:
+        return "tafs";
+      case TDSRequestType.station:
+        return 'stationinfo';
     }
   }
 
@@ -95,10 +105,38 @@ enum TDSRequestType {
     final path = '${isProxY ? '/aviationweather' : ''}/data/cache/$fileName';
     return Uri(scheme: 'https', host: host, path: path);
   }
+
+  /// Constructs a [Uri] for a request filtered by a specific area.
+  ///
+  /// The [byArea] method allows you to generate a URI that targets a particular
+  /// geographical area for the request. Provide the necessary parameters to
+  /// specify the area of interest.
+  ///
+  /// Returns a [Uri] representing the endpoint for the area-based request.
+  Uri byArea({
+    required double lat0,
+    required double lon0,
+    required double lat1,
+    required double lon1,
+    String? proxyHostName
+  }) {
+    final isProxy = kIsWeb && proxyHostName != null && proxyHostName.isNotEmpty;
+    final host = isProxy ? proxyHostName : 'aviationweather.gov';
+    final path = isProxy ? '/aviationweather/api/data/$_endpoint' : '/api/data/$_endpoint';
+    return Uri(
+      scheme: 'https',
+      host: host,
+      path: path,
+      queryParameters: {
+        'bbox': '$lat0,$lon0,$lat1,$lon1',
+        'format': 'xml',
+      },
+    );
+  }
 }
 
 /// A class representing a TDS (Terminal Data Service) request.
-/// 
+///
 /// This class is used to encapsulate the details and functionality
 /// required to create and manage requests to the TDS system.
 class TDSRequest {
@@ -112,15 +150,13 @@ class TDSRequest {
     Uri link = type.cachedFilesUri(false, proxyHostName);
     try {
       Response response = await get(link);
-      if (response.statusCode != 200)
-        throw Exception('${response.statusCode}');
+      if (response.statusCode != 200) throw Exception('${response.statusCode}');
       return response.body;
     } on Exception {
       developer.log("Error: No Internet connection on $link");
       return "";
     }
   }
-
 
   /// read file based Metar/Taf/Station information with all entries
   Future<String?> readZippedFile() async {
@@ -179,5 +215,36 @@ class TDSRequest {
     elements.removeWhere((key, value) {
       return (value.latitude < -90 || value.latitude > 90);
     });
+  }
+
+  /// Fetch data for a specific map area (bounding box) and return a map of TDSElements.
+  /// The endpoint and XML element are determined by the TDSRequestType.
+  /// [lat0, lon0] is the southwest corner, [lat1, lon1] is the northeast corner.
+  /// Returns a map where the keys are station IDs and the values are TDSElement objects.
+  Future<Map<String, TDSElement>?> fetchByArea({
+    required double lat0,
+    required double lon0,
+    required double lat1,
+    required double lon1,
+  }) async {
+    // Determine endpoint path based on TDSRequestType
+    final uri = type.byArea(
+        lat0: lat0,
+        lon0: lon0,
+        lat1: lat1,
+        lon1: lon1,
+        proxyHostName: proxyHostName);
+    try {
+      final response = await get(uri);
+      if (response.statusCode == 200) {
+        return parse(response.body);
+      } else {
+        developer.log('Failed to fetch $type: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      developer.log('Error fetching $type by bounding box: $e');
+      return null;
+    }
   }
 }

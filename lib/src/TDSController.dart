@@ -25,6 +25,8 @@ class TDSFetchDataException implements Exception {
 /// Type parameter [TDSElement] specifies the type of elements managed by this controller.
 class TDSController<TDSElement> extends NotifyChanges {
 
+ 
+
   final Map<String, TDSElement> tdsDict = Map();
 
   final TDSRequest request;
@@ -51,6 +53,31 @@ class TDSController<TDSElement> extends NotifyChanges {
 
     tdsDict.addAll(map.cast<String, TDSElement>());
     notifyListeners();
+    return tdsDict;
+  }
+
+   /// Fetch METARs for a specific bounding box and update tdsDict.
+  /// [lat0, lon0] is the southwest corner, [lat1, lon1] is the northeast corner.
+  Future<Map<String, TDSElement>?> fetchByArea({
+    required double lat0,
+    required double lon0,
+    required double lat1,
+    required double lon1,
+  }) async {
+    developer.log('#Metar_Parser fetchByArea bbox=[$lat0,$lon0,$lat1,$lon1]');
+    final map = await request.fetchByArea(
+      lat0: lat0,
+      lon0: lon0,
+      lat1: lat1,
+      lon1: lon1,
+    );
+
+    if (map != null) {
+      tdsDict.clear();
+      tdsDict.addAll(map.cast<String, TDSElement>());
+      notifyListeners();
+      return tdsDict;
+    }
     return tdsDict;
   }
 }
