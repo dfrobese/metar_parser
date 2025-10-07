@@ -1,44 +1,53 @@
 import 'dart:developer' as developer;
 import 'package:metar_parser_dart/metar_parser_dart.dart';
-import 'package:metar_parser_dart/src/TDSRequest.dart';
+import 'package:flutter/foundation.dart';
 
 
+class MetarProvider extends ChangeNotifier {
+  final MetarController _controller;
 
-/// Provides functionality to fetch and parse METAR (Meteorological Aerodrome Report) data.
-/// 
-/// This class is responsible for retrieving METAR information from various sources
-/// and parsing it into a usable format for the application.
-class MetarProvider {
-  final String proxyHostName;
+  MetarProvider({String proxyHostName = ''})
+      : _controller = MetarController(proxyHostName: proxyHostName);
 
-  /// Creates a [MetarProvider] instance with an optional proxy host name.
+  Map<String, MetarTDS> get metarDict => _controller.tdsDict;
+
+  /// Fetches METAR data for a specified area.
+  ///
+  /// This asynchronous method retrieves meteorological data (METAR) for a given area.
+  /// The area parameters and additional options should be provided as arguments.
   /// 
-  /// The [proxyHostName] parameter allows specifying a proxy server's host name
-  /// to be used for network requests. If not provided, it defaults to an empty string,
-  /// indicating that no proxy will be used.
-  MetarProvider({this.proxyHostName = ''});
-
-  /// Fetches METAR (Meteorological Aerodrome Report) data asynchronously.
+  /// Throws an exception if the fetch operation fails.
   ///
-  /// Returns a [Future] that completes with a [Map] where the keys are
-  /// [String] identifiers (such as airport codes) and the values are [MetarTDS]
-  /// objects containing the corresponding METAR data.
-  ///
-  /// Throws an exception if the data retrieval fails.
-  Future<Map<String, MetarTDS>> fetchMetar() async {
-    final Map<String, MetarTDS> tdsDict = {};
-    final TDSRequest request = TDSRequest(TDSRequestType.metar, proxyHostName);
+  /// Returns a [Future] that completes when the data has been fetched.
+  Future<void> fetchByArea({
+    required double lat0,
+    required double lon0,
+    required double lat1,
+    required double lon1,
+  }) async {
+    await _controller.fetchByArea(
+      lat0: lat0,
+      lon0: lon0,
+      lat1: lat1,
+      lon1: lon1,
+    );
+    notifyListeners();
+  }
 
-    var content = await request.readZippedFile();
-    var file;
-    if (content != null && (file = content.toString()).length < 100) {
-      developer.log('ERROR file not found');
-      throw TDSFetchDataException("An error occured, file not found");
-    }
-    final map = request.parse(file);
-    tdsDict.addAll(map.cast<String, MetarTDS>());
-    return tdsDict;
+  /// Performs a complete request to retrieve and process METAR data.
+  ///
+  /// This asynchronous method initiates a full data fetch operation,
+  /// handling all necessary steps to obtain and parse METAR information.
+  /// It may throw exceptions if the request fails or if data processing encounters errors.
+  ///
+  /// Returns a [Future] that completes when the request and processing are finished.
+  Future<void> fullRequest() async {
+    await _controller.fullRequest();
+    notifyListeners();
   }
 }
+
+
+
 
 
