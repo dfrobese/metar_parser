@@ -7,7 +7,7 @@ import '../../metar_parser_dart.dart';
 
 
 /// Taf content derived from NOAA text data server
-class TafTDS implements TDSElement {
+class TafTDS extends TDSElement {
   final String rawText;
   final String stationId;
   final DateTime issueTime;

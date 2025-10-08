@@ -1,4 +1,5 @@
 
+import 'package:latlong2/latlong.dart';
 import 'package:metar_parser_dart/src/cloud_stack.dart';
 import 'package:metar_parser_dart/src/flight_category.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
@@ -10,7 +11,7 @@ import '../cloud_coverage.dart';
 import '../present_weather.dart';
 
 
-class MetarTDS implements TDSElement, FlightCategoryRelated {
+class MetarTDS extends TDSElement with FlightCategoryRelated {
 
   String raw_text; //KROS 101504Z AUTO 05009G14KT 7SM DZ OVC005 08/07 A2970 RMK AO2 LTG DSNT NW P0001
   @override String station_id;
@@ -77,5 +78,7 @@ class MetarTDS implements TDSElement, FlightCategoryRelated {
   late FlightCategory flightCategory = this._flight_category == FlightCategory.NONE ? FlightCategory.calc(this) : this._flight_category;
   /// get type of change
   ChangeIndicator get changeIndicator => ChangeIndicator.METAR;
+
+
 }
 

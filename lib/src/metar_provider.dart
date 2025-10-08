@@ -10,7 +10,7 @@ class MetarProvider extends ChangeNotifier {
   MetarProvider({String proxyHostName = ''})
       : _controller = MetarController(proxyHostName: proxyHostName);
 
-  Map<String, MetarTDS> get metarDict => _controller.tdsDict;
+  Map<String, MetarTDS> get _metarDict => _controller.tdsDict;
 
   /// Fetches METAR data for a specified area.
   ///
@@ -57,9 +57,38 @@ class MetarProvider extends ChangeNotifier {
     await _controller.fetchByLocation(center: center);
     notifyListeners();
   }
+
+  /// Sorts the list of [MetarTDS] stations by their distance to the given [position].
+  ///
+  /// [position]: The reference [LatLng] location to sort stations by proximity.
+  List<MetarTDS> sortStationsByPosition(LatLng position) {
+    return _controller.sortStationsBy(position);
+  }
+
+  /// Sorts the list of [MetarTDS] stations by their distance to the given [position].
+  ///
+  /// [position]: The reference [LatLng] location to sort stations by proximity.
+  List<MetarTDS> sortStationsById(String stationId) {
+    final pos = _controller.tdsDict[stationId]?.position;
+    if (pos == null) return [];
+    return _controller.sortStationsBy(pos);
+  }
+
+  /// Returns the number of entries in the `_metarDict`.
+  ///
+  /// This getter provides the current length of the METAR dictionary,
+  /// indicating how many METAR records are available.
+  int get length => _metarDict.length;
+
+  /// Retrieves a [MetarTDS] instance corresponding to the provided [stationId].
+  ///
+  /// Throws an exception if no matching station is found.
+  ///
+  /// [stationId]: The identifier of the station to retrieve.
+  /// Returns the [MetarTDS] associated with the given [stationId].
+  MetarTDS getById(String stationId) {
+    return _metarDict[stationId]!;
+  }
+
+  
 }
-
-
-
-
-

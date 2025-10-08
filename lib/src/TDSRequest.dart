@@ -14,6 +14,20 @@ abstract class TDSElement {
   String get station_id;
   double get latitude; // 45.7</latitude>d
   double get longitude; // >-92.95</longitude>
+
+    /// distance to other station in Meters
+  double distanceToStation(MetarTDS to) {
+    return distanceToPos(to.position);
+  }
+
+  /// distance to other position in Meters
+  double distanceToPos(LatLng position) {
+    return const Distance().distance(this.position, position);
+  }
+
+  /// Provide LatLng position getter for TDSElement
+  LatLng get position => LatLng(latitude, longitude);
+
 }
 
 enum TDSRequestType {
@@ -248,7 +262,7 @@ class TDSRequest {
   /// The endpoint and XML element are determined by the TDSRequestType.
   /// [sw] is the southwest corner, [ne] is the northeast corner.
   /// Returns a map where the keys are station IDs and the values are TDSElement objects.
-  Future<Map<String, TDSElement>?> fetchByArea({
+  Future<Map<String, TDSElement>> fetchByArea({
     required LatLng sw,
     required LatLng ne,
   }) async {
@@ -278,7 +292,7 @@ class TDSRequest {
   /// Fetch data for a specific location (center point and radius in degrees) and return a map of TDSElements.
   /// [center] is the center LatLng, [radius] is the radius in degrees (not km/mi, for simplicity).
   /// Returns a map where the keys are station IDs and the values are TDSElement objects.
-  Future<Map<String, TDSElement>?> fetchByLocation({
+  Future<Map<String, TDSElement>> fetchByLocation({
     required LatLng center,
   }) async {
     // Simple bounding box for now
@@ -290,7 +304,7 @@ class TDSRequest {
 
 /// Fetch data for a specific ICAO station ID and return a map of TDSElements (usually one entry).
   /// [stationId] is the ICAO code (e.g., 'EDDV').
-  Future<Map<String, TDSElement>?> fetchByID(String stationId) async {
+  Future<Map<String, TDSElement>> fetchByID(String stationId) async {
     final uri = type.byID( stationId: stationId, proxyHostName: proxyHostName );
     developer.log('Fetching $type for $stationId from $uri');
     try {
@@ -308,4 +322,7 @@ class TDSRequest {
       throw TDSFetchDataException("No http connection to NOAA TDS");
     }
   } 
+
+ 
+
 }
