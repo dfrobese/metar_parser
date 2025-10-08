@@ -86,9 +86,9 @@ class MetarProvider extends ChangeNotifier {
   ///
   /// [stationId]: The identifier of the station to retrieve.
   /// Returns the [MetarTDS] associated with the given [stationId].
-  MetarTDS getById(String stationId) {
-    return _metarDict[stationId]!;
+  MetarTDS? getById(String stationId) {
+    return _metarDict[stationId];
   }
 
-  
+
 }
