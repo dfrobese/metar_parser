@@ -72,7 +72,7 @@ class TafProvider  extends ChangeNotifier{
   TafTDS? getById(String stationId) => _tafDict[stationId];
 
   /// Sorts forecasts by their distance to the provided position.
-  List<TafTDS> sortByPosition(LatLng position) {
+  List<TafTDS> sortByLocation(LatLng position) {
     return _controller.sortStationsBy(position);
   }
 

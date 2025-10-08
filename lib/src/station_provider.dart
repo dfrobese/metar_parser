@@ -47,7 +47,7 @@ class StationProvider extends ChangeNotifier {
   StationTDS? getById(String stationId) => _stationDict[stationId];
 
   /// Sorts stations by their distance to the provided position.
-  List<StationTDS> sortByPosition(LatLng position) {
+  List<StationTDS> sortByLocation(LatLng position) {
     return _controller.sortStationsBy(position);
   }
 

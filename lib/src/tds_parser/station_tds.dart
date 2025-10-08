@@ -1,4 +1,3 @@
-import 'package:latlong2/latlong.dart';
 import 'package:country/country.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
 import 'package:xml/xml.dart';
@@ -20,6 +19,13 @@ class StationTDS extends TDSElement {
 
     StationTDS._(this.station_id, this.wmo_id, this.latitude, this.longitude, this.elevation_m, this.site, this.state, this.country);
 
+    /// Creates a new instance of [StationTDS] from the provided [XmlElement].
+    ///
+    /// Parses the given XML element and extracts the relevant data to
+    /// initialize a [StationTDS] object.
+    ///
+    /// Throws an [Exception] if the XML element does not contain the
+    /// required information for parsing.
     factory StationTDS.fromElement(XmlElement element) {
         var wmoId = element.getElement('wmo_id')?.innerText ?? "";
         var id = element.getElement('station_id')?.innerText ?? "";

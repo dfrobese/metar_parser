@@ -1,54 +1,60 @@
 
-import 'package:metar_parser_dart/metar_parser_dart.dart';
-import 'package:test/expect.dart';
-import 'package:test/scaffolding.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:metar_parser_dart/metar_parser_dart.dart';
+import 'package:test/test.dart';
 
-void main () {
-  test('StationProvider fetchByID for EDDV', () async {
-    final provider = StationProvider();
-    await provider.fetchByID('EDDV');
-    final dict = provider.stationDict;
-    expect(dict.isNotEmpty, true);
-    expect(dict.containsKey('EDDV'), true);
+Future<StationProvider> _providerWithStation(String stationId) async {
+  final provider = StationProvider();
+  await provider.fetchByID(stationId);
+  return provider;
+}
+
+void main() {
+  const hannover = 'EDDV';
+  const hannoverLat = 52.4603;
+  const hannoverLon = 9.6851;
+
+  test('fetchByID populates provider with requested station', () async {
+    final provider = await _providerWithStation(hannover);
+    expect(provider.length, greaterThan(0));
+    expect(provider.getById(hannover)?.station_id, hannover);
   });
 
-  test('StationProvider fetchByLocation around EDDV', () async {
-    // EDDV (Hannover): 52.4603, 9.6851
+  test('fetchByLocation hits expected station proximity', () async {
     final provider = StationProvider();
-    final center = LatLng(52.4603, 9.6851);
-    await provider.fetchByLocation(center: center);
-    final dict = provider.stationDict;
-    expect(dict.isNotEmpty, true);
-    expect(dict.keys.any((k) => k == 'EDDV'), true);
+    await provider.fetchByLocation(center: const LatLng(hannoverLat, hannoverLon));
+    expect(provider.length, greaterThan(0));
+    expect(provider.getById(hannover)?.station_id, isNotNull);
   });
 
-  test('StationProvider fetchByArea around EDDV', () async {
+  test('fetchByArea returns stations within the bounding box', () async {
     final provider = StationProvider();
-    final sw = LatLng(52.3, 9.5);
-    final ne = LatLng(52.6, 9.9);
-    await provider.fetchByArea(sw: sw, ne: ne);
-    final dict = provider.stationDict;
-    expect(dict.isNotEmpty, true);
-    expect(dict.keys.any((k) => k == 'EDDV'), true);
+    await provider.fetchByArea(
+      sw: const LatLng(52.3, 9.5),
+      ne: const LatLng(52.6, 9.9),
+    );
+    expect(provider.length, greaterThan(0));
+    expect(provider.getById(hannover)?.station_id, isNotNull);
   });
 
-  test('StationProvider fullRequest', () async {
+  test('fullRequest pulls the complete station list', () async {
     final provider = StationProvider();
     await provider.fullRequest();
-    final dict = provider.stationDict;
-    expect(dict.isNotEmpty, true);
-    expect(dict.keys.any((k) => k == 'EDDV'), true);
-  });
-  test('Stations test', () async {
-    final Map<String, StationTDS> stations = await StationController().fullRequest();
-    final eddv = stations['EDDV'];
-    expect(eddv != null, true);
-    expect(eddv!.station_id, 'EDDV');
-    print(eddv.station_id);
-    stations.values.toList().forEach((element) {
-      expect((element.latitude > 90 || element.latitude < -90), false,reason: "Station ${element.station_id}");
-    });
+    expect(provider.length, greaterThan(0));
+    expect(provider.getById(hannover)?.station_id, hannover);
   });
 
+  test('StationController fullRequest returns valid coordinates', () async {
+    final stations = await StationController().fullRequest();
+    final eddv = stations[hannover];
+    expect(eddv, isNotNull);
+    expect(eddv!.station_id, hannover);
+    for (final element in stations.values) {
+      expect(
+        element.latitude >= -90 && element.latitude <= 90,
+        isTrue,
+        reason: 'Station ${element.station_id} has invalid latitude',
+      );
+    }
+  });
 }

@@ -1,4 +1,3 @@
-import 'dart:developer' as developer;
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
@@ -61,14 +60,14 @@ class MetarProvider extends ChangeNotifier {
   /// Sorts the list of [MetarTDS] stations by their distance to the given [position].
   ///
   /// [position]: The reference [LatLng] location to sort stations by proximity.
-  List<MetarTDS> sortStationsByPosition(LatLng position) {
+  List<MetarTDS> sortByLocation(LatLng position) {
     return _controller.sortStationsBy(position);
   }
 
   /// Sorts the list of [MetarTDS] stations by their distance to the given [position].
   ///
   /// [position]: The reference [LatLng] location to sort stations by proximity.
-  List<MetarTDS> sortStationsById(String stationId) {
+  List<MetarTDS> sortByStation(String stationId) {
     final pos = _controller.tdsDict[stationId]?.position;
     if (pos == null) return [];
     return _controller.sortStationsBy(pos);
@@ -80,6 +79,13 @@ class MetarProvider extends ChangeNotifier {
   /// indicating how many METAR records are available.
   int get length => _metarDict.length;
 
+  /// Applies [convert] to each `MetarTDS` currently in memory, similar to `List.map`.
+  ///
+  /// The returned iterable stays lazy like the standard collection helpers.
+  Iterable<R> map<R>(R Function(MetarTDS metar) convert) {
+    return _metarDict.values.map(convert);
+  }
+
   /// Retrieves a [MetarTDS] instance corresponding to the provided [stationId].
   ///
   /// Throws an exception if no matching station is found.
@@ -89,6 +95,7 @@ class MetarProvider extends ChangeNotifier {
   MetarTDS? getById(String stationId) {
     return _metarDict[stationId];
   }
+
 
 
 }

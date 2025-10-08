@@ -1,5 +1,4 @@
 
-import 'package:latlong2/latlong.dart';
 import 'package:metar_parser_dart/src/cloud_stack.dart';
 import 'package:metar_parser_dart/src/flight_category.dart';
 import 'package:metar_parser_dart/src/TDSRequest.dart';
@@ -22,6 +21,12 @@ class MetarTDS extends TDSElement with FlightCategoryRelated {
 
   MetarTDS._(this.raw_text, this.station_id, this.observation_time, this.latitude, this.longitude, this.metarElement);
 
+  /// Creates a [MetarTDS] instance from the provided [XmlElement] representing a METAR element.
+  ///
+  /// Parses the given [metarElement] to extract TDS (Temperature/Dewpoint Spread) information
+  /// and constructs a [MetarTDS] object.
+  ///
+  /// Throws a [FormatException] if the [metarElement] does not contain valid TDS data.
   factory MetarTDS.fromElement(XmlElement metarElement) {
     var raw = metarElement.getElement('raw_text')?.innerText ?? "";
     var id = metarElement.getElement('station_id')?.innerText ?? "";

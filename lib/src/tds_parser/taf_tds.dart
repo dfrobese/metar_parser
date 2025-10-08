@@ -30,6 +30,13 @@ class TafTDS extends TDSElement {
     required this.tafElement
   });
 
+  /// Creates a new instance of [TafTDS] from the provided [XmlElement].
+  ///
+  /// Parses the given XML element and extracts the relevant data to
+  /// initialize a [TafTDS] object.
+  ///
+  /// Throws an [Exception] if the XML does not contain the expected structure
+  /// or required fields.
   factory TafTDS.fromXml(XmlElement xml) {
     return TafTDS(
       rawText: xml.getElement('raw_text')?.innerText ?? '',
