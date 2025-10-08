@@ -1,38 +1,42 @@
-import 'dart:developer' as developer;
+
+import 'package:flutter/foundation.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 
-import 'package:metar_parser_dart/src/TDSRequest.dart';
+class StationProvider extends ChangeNotifier {
+  final StationController _controller;
 
-/// A provider class for fetching station data.
-///
-/// This class allows configuration of the proxy host name for network requests.
-/// Use [fetchStation] to retrieve and parse station data as a map.
-class StationProvider {
-  /// The proxy host name to use for network requests.
-  final String proxyHostName;
+  StationProvider({String proxyHostName = ''})
+      : _controller = StationController(proxyHostName: proxyHostName);
 
-  /// Creates a [StationProvider] with an optional [proxyHostName].
-  ///
-  /// If [proxyHostName] is not provided, the default is an empty string (no proxy).
-  StationProvider({this.proxyHostName = ''});
+  Map<String, StationTDS> get stationDict => _controller.tdsDict;
 
-  /// Fetches and parses station data from the remote server.
-  ///
-  /// Returns a [Map] where the key is a [String] (station ID) and the value is a [StationTDS] object.
-  /// Throws a [TDSFetchDataException] if the data cannot be retrieved or is invalid.
-  Future<Map<String, StationTDS>> fetchStation() async {
-    developer.log('#station_Provider fullRequest');
-    final Map<String, StationTDS> tdsDict = {};
-    final TDSRequest request = TDSRequest(TDSRequestType.station, proxyHostName);
+  /// Fetches all stations (full request) and updates state.
+  Future<void> fullRequest() async {
+    await _controller.fullRequest();
+    notifyListeners();
+  }
 
-    var content = await request.readZippedFile();
-    final file = content.toString();
-    if (file.length < 100) {
-      developer.log('ERROR file not found');
-      throw TDSFetchDataException("An error occured, file not found");
-    }
-    final map = request.parse(file);
-    tdsDict.addAll(map.cast<String, StationTDS>());
-    return tdsDict;
+  /// Fetches station data for a specific ICAO station ID and updates state.
+  Future<void> fetchByID(String stationId) async {
+    await _controller.fetchByID(stationId);
+    notifyListeners();
+  }
+
+  /// Fetches station data for a specific location (center point) and updates state.
+  Future<void> fetchByLocation({
+    required LatLng center
+  }) async {
+    await _controller.fetchByLocation(center: center);
+    notifyListeners();
+  }
+
+  /// Fetches station data for a specified area (bounding box) and updates state.
+  Future<void> fetchByArea({
+    required LatLng sw,
+    required LatLng ne,
+  }) async {
+    await _controller.fetchByArea(sw: sw, ne: ne);
+    notifyListeners();
   }
 }

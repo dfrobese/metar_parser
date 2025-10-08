@@ -1,9 +1,42 @@
+import 'package:latlong2/latlong.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/raw_parser/metar_raw.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
+
 void main() {
+
+  test('MetarController fetchByID for EDDV', () async {
+    final controller = MetarController();
+    final result = await controller.fetchByID('EDDV');
+    expect(result, isNotNull);
+    expect(result!.isNotEmpty, true);
+    expect(result.keys.contains('EDDV'), true);
+  });
+
+  test('MetarController fetchByLocation around EDDV', () async {
+    // EDDV (Hannover): 52.4603, 9.6851
+    final center = LatLng(52.4603, 9.6851);
+    final controller = MetarController();
+    final result = await controller.fetchByLocation(center: center);
+    expect(result, isNotNull);
+    expect(result!.isNotEmpty, true);
+    expect(result.keys.any((k) => k == 'EDDV'), true);
+  });
+
+  test('MetarController fetchByArea around EDDV', () async {
+    // EDDV (Hannover): 52.4603, 9.6851
+    final sw = LatLng(52.3, 9.5); // southwest corner
+    final ne = LatLng(52.6, 9.9); // northeast corner
+    final controller = MetarController();
+    final result = await controller.fetchByArea(sw: sw, ne: ne);
+    expect(result, isNotNull);
+    expect(result!.isNotEmpty, true);
+    // Optionally, check if EDDV is in the result
+    expect(result.keys.any((k) => k == 'EDDV'), true);
+  });
+
   test('Static Metar raw parser test', () {
     final lfbm = MetarRaw.parse(
         "METAR LFBM 162130Z AUTO 06003KT CAVOK 07/06 Q1020 BECMG 0500 FG");

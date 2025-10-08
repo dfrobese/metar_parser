@@ -16,6 +16,7 @@ dependencies:
   http: ^1.2.2
   intl: ^0.20.1
   foundation:
+  latlong2: ^0.9.1
   
  # quiver: ^3.1.0
   # tuple: ^2.0.0

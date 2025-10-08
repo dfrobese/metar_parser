@@ -1,9 +1,10 @@
 import 'dart:developer' as developer;
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:flutter/foundation.dart';
-
+import 'package:latlong2/latlong.dart';
 
 class MetarProvider extends ChangeNotifier {
+
   final MetarController _controller;
 
   MetarProvider({String proxyHostName = ''})
@@ -20,16 +21,12 @@ class MetarProvider extends ChangeNotifier {
   ///
   /// Returns a [Future] that completes when the data has been fetched.
   Future<void> fetchByArea({
-    required double lat0,
-    required double lon0,
-    required double lat1,
-    required double lon1,
+    required LatLng sw,
+    required LatLng ne,
   }) async {
     await _controller.fetchByArea(
-      lat0: lat0,
-      lon0: lon0,
-      lat1: lat1,
-      lon1: lon1,
+      sw: sw,
+      ne: ne,
     );
     notifyListeners();
   }
@@ -43,6 +40,21 @@ class MetarProvider extends ChangeNotifier {
   /// Returns a [Future] that completes when the request and processing are finished.
   Future<void> fullRequest() async {
     await _controller.fullRequest();
+    notifyListeners();
+  }
+
+  
+  /// Fetches METAR data for a specific ICAO station ID and updates state.
+  Future<void> fetchByID(String stationId) async {
+    await _controller.fetchByID(stationId);
+    notifyListeners();
+  }
+
+  /// Fetches METAR data for a specific location (center point) and updates state.
+  Future<void> fetchByLocation({
+    required LatLng center
+  }) async {
+    await _controller.fetchByLocation(center: center);
     notifyListeners();
   }
 }

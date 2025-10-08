@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:http/http.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/tds_parser/station_tds.dart';
 import 'package:xml/xml.dart';
@@ -84,9 +85,9 @@ enum TDSRequestType {
   String get _endpoint {
     switch (this) {
       case TDSRequestType.metar:
-        return "metars";
+        return "metar";
       case TDSRequestType.taf:
-        return "tafs";
+        return "taf";
       case TDSRequestType.station:
         return 'stationinfo';
     }
@@ -133,6 +134,30 @@ enum TDSRequestType {
       },
     );
   }
+
+  /// Constructs a [Uri] using the provided ID.
+  ///
+  /// This method builds a URI based on the given parameters.
+  /// 
+  /// Returns a [Uri] object.
+  Uri byID({
+    required String stationId,
+    String? proxyHostName
+  }) {
+      final isProxy = kIsWeb && proxyHostName != null && proxyHostName.isNotEmpty;
+    final host = isProxy ? proxyHostName : 'aviationweather.gov';
+    final path = isProxy ? '/aviationweather/api/data/$_endpoint' : '/api/data/$_endpoint';
+    final uri = Uri(
+      scheme: 'https',
+      host: host,
+      path: path,
+      queryParameters: {
+        'ids': stationId,
+        'format': 'xml',
+      },
+    );
+    return uri;
+  }
 }
 
 /// A class representing a TDS (Terminal Data Service) request.
@@ -140,6 +165,8 @@ enum TDSRequestType {
 /// This class is used to encapsulate the details and functionality
 /// required to create and manage requests to the TDS system.
 class TDSRequest {
+
+  
   final TDSRequestType type;
   final String proxyHostName;
 
@@ -219,32 +246,66 @@ class TDSRequest {
 
   /// Fetch data for a specific map area (bounding box) and return a map of TDSElements.
   /// The endpoint and XML element are determined by the TDSRequestType.
-  /// [lat0, lon0] is the southwest corner, [lat1, lon1] is the northeast corner.
+  /// [sw] is the southwest corner, [ne] is the northeast corner.
   /// Returns a map where the keys are station IDs and the values are TDSElement objects.
   Future<Map<String, TDSElement>?> fetchByArea({
-    required double lat0,
-    required double lon0,
-    required double lat1,
-    required double lon1,
+    required LatLng sw,
+    required LatLng ne,
   }) async {
-    // Determine endpoint path based on TDSRequestType
     final uri = type.byArea(
-        lat0: lat0,
-        lon0: lon0,
-        lat1: lat1,
-        lon1: lon1,
-        proxyHostName: proxyHostName);
+      lat0: sw.latitude,
+      lon0: sw.longitude,
+      lat1: ne.latitude,
+      lon1: ne.longitude,
+      proxyHostName: proxyHostName,
+    );
     try {
       final response = await get(uri);
       if (response.statusCode == 200) {
-        return parse(response.body);
+        final map = parse(response.body);
+        filterFalseEntries(map);
+        return map;
       } else {
         developer.log('Failed to fetch $type: ${response.statusCode}');
-        return null;
+        throw TDSFetchDataException("No http connection to NOAA TDS");
       }
     } catch (e) {
       developer.log('Error fetching $type by bounding box: $e');
-      return null;
+      throw TDSFetchDataException("No http connection to NOAA TDS");
     }
   }
+
+  /// Fetch data for a specific location (center point and radius in degrees) and return a map of TDSElements.
+  /// [center] is the center LatLng, [radius] is the radius in degrees (not km/mi, for simplicity).
+  /// Returns a map where the keys are station IDs and the values are TDSElement objects.
+  Future<Map<String, TDSElement>?> fetchByLocation({
+    required LatLng center,
+  }) async {
+    // Simple bounding box for now
+    final radius = 0.1; // degrees
+    final sw = LatLng(center.latitude - radius, center.longitude - radius);
+    final ne = LatLng(center.latitude + radius, center.longitude + radius);
+    return fetchByArea(sw: sw, ne: ne);
+  }
+
+/// Fetch data for a specific ICAO station ID and return a map of TDSElements (usually one entry).
+  /// [stationId] is the ICAO code (e.g., 'EDDV').
+  Future<Map<String, TDSElement>?> fetchByID(String stationId) async {
+    final uri = type.byID( stationId: stationId, proxyHostName: proxyHostName );
+    developer.log('Fetching $type for $stationId from $uri');
+    try {
+      final response = await get(uri);
+      if (response.statusCode == 200) {
+        final map = parse(response.body);
+        filterFalseEntries(map);
+        return map;
+      } else {
+        developer.log('Failed to fetch $type for $stationId: \\${response.statusCode}');
+        throw TDSFetchDataException("No http connection to NOAA TDS");
+      }
+    } catch (e) {
+      developer.log('Error fetching $type for $stationId: $e');
+      throw TDSFetchDataException("No http connection to NOAA TDS");
+    }
+  } 
 }
