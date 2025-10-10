@@ -107,18 +107,33 @@ enum TDSRequestType {
     }
   }
 
+  /// Constructs a [Uri] using the provided [proxyHostName] and [pathTo].
+  /// 
+  /// Optionally, [queryParameters] can be supplied to include query parameters in the URI.
+  /// 
+  /// - [proxyHostName]: The hostname of the proxy server.
+  /// - [pathTo]: The path to append to the URI.
+  /// - [queryParameters]: Optional map of query parameters to include in the URI.
+  /// 
+  /// Returns a [Uri] object representing the constructed URI.
+  Uri _getUri(String? proxyHostName, String pathTo, {Map<String, String>? queryParameters}) {
+    final isProxy = kIsWeb && proxyHostName != null && proxyHostName.isNotEmpty;
+    final host = isProxy ? proxyHostName : 'aviationweather.gov';
+    final path = '${isProxy ? '/aviationweather' : ''}$pathTo';
+
+    return Uri(scheme: 'https', host: host, path: path, queryParameters: queryParameters);
+  }
+
   /// Returns a [Uri] for cached files based on whether the files are zipped and the specified proxy host name.
   ///
   /// [isZipped] determines if the cached files are in a zipped format.
   /// [proxyHostName] is the host name of the proxy server to use for the URI.
   ///
   /// Returns a [Uri] pointing to the location of the cached files.
-  Uri cachedFilesUri(bool isZipped, String proxyHostName) {
+  Uri cachedFilesUri(bool isZipped, String? proxyHostName) {
     final fileName = isZipped ? '$_cachedFileName.gz' : _cachedFileName;
-    final isProxY = kIsWeb && proxyHostName.isNotEmpty;
-    final host = isProxY ? proxyHostName : 'aviationweather.gov';
-    final path = '${isProxY ? '/aviationweather' : ''}/data/cache/$fileName';
-    return Uri(scheme: 'https', host: host, path: path);
+    final uri = _getUri(proxyHostName, '/data/cache/$fileName');
+    return uri;
   }
 
   /// Constructs a [Uri] for a request filtered by a specific area.
@@ -135,18 +150,13 @@ enum TDSRequestType {
     required double lon1,
     String? proxyHostName
   }) {
-    final isProxy = kIsWeb && proxyHostName != null && proxyHostName.isNotEmpty;
-    final host = isProxy ? proxyHostName : 'aviationweather.gov';
-    final path = isProxy ? '/aviationweather/api/data/$_endpoint' : '/api/data/$_endpoint';
-    return Uri(
-      scheme: 'https',
-      host: host,
-      path: path,
-      queryParameters: {
-        'bbox': '$lat0,$lon0,$lat1,$lon1',
-        'format': 'xml',
-      },
-    );
+    final queryParameters = {
+      'bbox': '$lat0,$lon0,$lat1,$lon1',
+      'format': 'xml',
+    };
+    final uri = _getUri(proxyHostName, '/api/data/$_endpoint', queryParameters: queryParameters);
+    developer.log('byArea URI: $uri');
+    return uri;
   }
 
   /// Constructs a [Uri] using the provided ID.
@@ -158,18 +168,12 @@ enum TDSRequestType {
     required String stationId,
     String? proxyHostName
   }) {
-      final isProxy = kIsWeb && proxyHostName != null && proxyHostName.isNotEmpty;
-    final host = isProxy ? proxyHostName : 'aviationweather.gov';
-    final path = isProxy ? '/aviationweather/api/data/$_endpoint' : '/api/data/$_endpoint';
-    final uri = Uri(
-      scheme: 'https',
-      host: host,
-      path: path,
-      queryParameters: {
+     final queryParameters = {
         'ids': stationId,
         'format': 'xml',
-      },
-    );
+      };
+    final uri = _getUri(proxyHostName, '/api/data/$_endpoint', queryParameters: queryParameters);
+    developer.log('byID URI: $uri');
     return uri;
   }
 }
@@ -182,9 +186,9 @@ class TDSRequest {
 
   
   final TDSRequestType type;
-  final String proxyHostName;
+  final String? proxyHostName;
 
-  TDSRequest(this.type, [this.proxyHostName = '']);
+  TDSRequest(this.type, [this.proxyHostName]);
 
   /// read file based Metar/Taf/Station information with all entries
   Future<String> readFile() async {
