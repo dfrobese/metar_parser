@@ -57,7 +57,7 @@ class TafTDS extends TDSElement {
   /// list of forecasts sorted by time
   late final List<ForecastTDS>forecasts = _buildForecasts();
   /// taf objects parsed from raw text
-  ///late final TafRaw _tafFromRaw = TafRaw.parse(rawText);
+  late final TafRaw rawObject = TafRaw.parse(rawText);
   /// GPS coordinates of station
   late final Coordinate coordinate = Coordinate(latitude: latitude, longitude: longitude);
 

@@ -15,6 +15,8 @@ class StationTDS extends TDSElement {
     String country;
     /// GPS coordinates of station
     late final Coordinate coordinate =  Coordinate(latitude: latitude, longitude: longitude);
+    /// Site name in title case: the TDS files it in capitals (`HANNOVER`).
+    String get name => _toTitleCase(site);
 
 
     StationTDS._(this.station_id, this.wmo_id, this.latitude, this.longitude, this.elevation_m, this.site, this.state, this.country);
@@ -43,4 +45,33 @@ class StationTDS extends TDSElement {
     }
 
     
+}
+
+
+/// `HANNOVER/LANGENHAGEN` → `Hannover/Langenhagen`, keeping the delimiters
+/// (space, slash, dash) as they are.
+String _toTitleCase(String text) {
+  if (text.length <= 1) {
+    return text.toUpperCase();
+  }
+  final pattern = RegExp(r' |/|-');
+  final words = text.split(pattern);
+  final capitalizedWords = words.map((word) {
+    final trimmed = word.trim();
+    if (trimmed.isEmpty) return '';
+    return '${trimmed.substring(0, 1).toUpperCase()}${trimmed.substring(1).toLowerCase()}';
+  }).toList();
+
+  final result = StringBuffer();
+  var wordIndex = 0;
+  for (var i = 0; i < text.length; i++) {
+    if (pattern.hasMatch(text[i])) {
+      result.write(text[i]);
+    } else {
+      result.write(capitalizedWords[wordIndex]);
+      i += words[wordIndex].length - 1;
+      wordIndex++;
+    }
+  }
+  return result.toString();
 }

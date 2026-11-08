@@ -7,6 +7,12 @@ export 'src/tds_parser/station_tds.dart';
 /// Raw objects
 export 'src/raw_parser/metar_raw.dart';
 export 'src/raw_parser/taf_raw.dart';
+/// Derived values and display text
+export 'src/wind.dart';
+export 'src/cloud_layer.dart';
+export 'src/wind_component.dart';
+export 'src/metar_text.dart';
+export 'src/forecast_summary.dart';
 /// Data Provider
 export 'src/flight_category.dart';
 export 'src/TDSController.dart';
