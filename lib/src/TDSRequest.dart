@@ -4,11 +4,14 @@ import 'package:latlong2/latlong.dart';
 import 'package:metar_parser_dart/metar_parser_dart.dart';
 import 'package:metar_parser_dart/src/tds_parser/station_tds.dart';
 import 'package:xml/xml.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 // Conditional imports
 import './extension/decompress_native.dart'
     if (dart.library.html) './extension/decompress_web.dart';
+
+/// True in a browser build. Same check as Flutter's `kIsWeb`, without
+/// depending on Flutter, so the package also runs in plain Dart (servers).
+const bool _isWeb = bool.fromEnvironment('dart.library.js_interop');
 
 abstract class TDSElement {
   String get station_id;
@@ -117,7 +120,7 @@ enum TDSRequestType {
   /// 
   /// Returns a [Uri] object representing the constructed URI.
   Uri _getUri(String? proxyHostName, String pathTo, {Map<String, String>? queryParameters}) {
-    final isProxy = kIsWeb && proxyHostName != null && proxyHostName.isNotEmpty;
+    final isProxy = _isWeb && proxyHostName != null && proxyHostName.isNotEmpty;
     final host = isProxy ? proxyHostName : 'aviationweather.gov';
     final path = '${isProxy ? '/aviationweather' : ''}$pathTo';
 

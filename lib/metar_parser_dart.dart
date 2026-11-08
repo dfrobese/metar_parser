@@ -13,9 +13,6 @@ export 'src/cloud_layer.dart';
 export 'src/wind_component.dart';
 export 'src/metar_text.dart';
 export 'src/forecast_summary.dart';
-/// Data Provider
+/// Flight category and data controllers
 export 'src/flight_category.dart';
 export 'src/TDSController.dart';
-export 'src/metar_provider.dart';
-export 'src/taf_provider.dart';
-export 'src/station_provider.dart';

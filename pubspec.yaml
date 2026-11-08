@@ -23,8 +23,6 @@ dependencies:
   # tuple: ^2.0.0
 
 dev_dependencies:
-  flutter:
-    sdk: flutter
   build_runner: ^2.4.9
   custom_lint:
   test: ^1.25.8
