@@ -1,3 +1,4 @@
+import 'package:metar_parser_dart/src/extension/date_time.dart';
 import 'package:metar_parser_dart/src/present_weather.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
@@ -22,5 +23,21 @@ void main () {
     print(weather.text);
   });
 
+  test('several groups, unknown codes and odd spacing always end', () {
+    expect(PresentWeather.parse('-RADZ BR').text, 'light rain drizzle mist');
+    expect(PresentWeather.parse('  +TSRA  FG ').text, 'heavy thunderstorms rain fog');
+    expect(PresentWeather.parse('NSW').text, 'NSW');
+    expect(PresentWeather.parse('-RAXX BR').text, 'light rain XX mist');
+    expect(PresentWeather.parse('').text, '');
+    expect(PresentWeather.parse('-RADZ BR').symbol, contains('🌧'));
+  });
 
+
+
+  test('a TAF issue time that is no ddhhmm group does not throw', () {
+    final now = DateTime.now().toUtc();
+    expect(DateTimeExtension.parseIssueTime('101700Z'), DateTime.utc(now.year, now.month, 10, 17));
+    expect(DateTimeExtension.parseIssueTime(' 00').year, now.year);
+    expect(DateTimeExtension.parseIssueTime('').year, now.year);
+  });
 }

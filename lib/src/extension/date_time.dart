@@ -12,12 +12,16 @@ extension DateTimeExtension on DateTime {
 
   /// parse issue time of Taf format is "ddhhmmZ" month and
   /// year will be set to current date
+  ///
+  /// A TAF without issue time and validity ("TAF EDXX NIL", cancelled TAFs)
+  /// has no such group; then the current time stands in instead of failing.
   static DateTime parseIssueTime(String issueTimeString) {
-    // Assuming the format is "ddhhmmZ"
     final now = DateTime.now().toUtc();
-    final day = int.parse(issueTimeString.substring(0, 2));
-    final hour = int.parse(issueTimeString.substring(2, 4));
-    final minute = int.parse(issueTimeString.substring(4, 6));
+    final match = RegExp(r'^(\d{2})(\d{2})(\d{2})').firstMatch(issueTimeString.trim());
+    if (match == null) return DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
+    final day = int.parse(match.group(1)!);
+    final hour = int.parse(match.group(2)!);
+    final minute = int.parse(match.group(3)!);
     return DateTime.utc(now.year, now.month, day, hour, minute);
   }
 

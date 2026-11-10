@@ -34,20 +34,26 @@ class PresentWeather {
   /// parse weather from single wx string
   factory PresentWeather.parse(String wxString) {
 
-    var line = wxString;
-    StringBuffer text = StringBuffer();
-    StringBuffer symbol = StringBuffer();
-
+    final text = StringBuffer();
+    final symbol = StringBuffer();
     final rx = RegExp(PresentWeather.pattern);
 
-    while (line.length > 0) {
-      final match = rx.firstMatch(line);
-      if (match != null && match.start == 0) {
-        final item = match[0]!.trim();
-        // map found acronym to plain text
-        text.write(all[item]! + " ");
-        symbol.write(symbols[item] ?? "");
-        line = line.substring(match.end);
+    // Group by group ("-RADZ BR" → "-RADZ", "BR"); within a group the codes
+    // follow each other without separator. A remainder no code matches
+    // (e.g. "NSW") is kept as it is. Every step consumes input, so the loop
+    // always ends (it used to spin forever on the space between groups).
+    for (final group in wxString.trim().split(RegExp(r'\s+'))) {
+      var rest = group;
+      while (rest.isNotEmpty) {
+        final match = rx.matchAsPrefix(rest);
+        if (match == null || match.end == 0) {
+          text.write('$rest ');
+          break;
+        }
+        final item = match[0]!;
+        text.write('${all[item] ?? item} ');
+        symbol.write(symbols[item] ?? '');
+        rest = rest.substring(match.end);
       }
     }
     return PresentWeather._(wxString, text.toString().trim(), symbol.toString());
